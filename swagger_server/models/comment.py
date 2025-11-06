@@ -6,7 +6,6 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.comment import Comment  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -15,7 +14,7 @@ class Comment(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: str=None, target_type: str=None, target_id: str=None, user_id: str=None, text: str=None, rating: int=None, status: str='visible', likes: int=0, created_at: datetime=None, updated_at: datetime=None, replies: List[Comment]=None):  # noqa: E501
+    def __init__(self, id: str=None, target_type: str=None, target_id: str=None, user_id: str=None, text: str=None, rating: int=None, status: str='visible', likes: int=0, created_at: datetime=None, updated_at: datetime=None, replies: List['Comment']=None):  # noqa: E501
         """Comment - a model defined in Swagger
 
         :param id: The id of this Comment.  # noqa: E501
@@ -39,7 +38,7 @@ class Comment(Model):
         :param updated_at: The updated_at of this Comment.  # noqa: E501
         :type updated_at: datetime
         :param replies: The replies of this Comment.  # noqa: E501
-        :type replies: List[Comment]
+        :type replies: List['Comment']
         """
         self.swagger_types = {
             'id': str,
@@ -52,7 +51,7 @@ class Comment(Model):
             'likes': int,
             'created_at': datetime,
             'updated_at': datetime,
-            'replies': List[Comment]
+            'replies': List['Comment']
         }
 
         self.attribute_map = {
@@ -314,22 +313,22 @@ class Comment(Model):
         self._updated_at = updated_at
 
     @property
-    def replies(self) -> List[Comment]:
+    def replies(self) -> List['Comment']:
         """Gets the replies of this Comment.
 
 
         :return: The replies of this Comment.
-        :rtype: List[Comment]
+        :rtype: List['Comment']
         """
         return self._replies
 
     @replies.setter
-    def replies(self, replies: List[Comment]):
+    def replies(self, replies: List['Comment']):
         """Sets the replies of this Comment.
 
 
         :param replies: The replies of this Comment.
-        :type replies: List[Comment]
+        :type replies: List['Comment']
         """
 
         self._replies = replies
