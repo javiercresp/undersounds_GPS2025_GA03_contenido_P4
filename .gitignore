@@ -33,3 +33,5 @@ temp/
 # === Swagger generated extras ===
 .swagger-codegen/
 .swagger-codegen-ignore
+
+/generated/prisma
