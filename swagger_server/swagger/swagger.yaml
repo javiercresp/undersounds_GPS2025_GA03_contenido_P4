@@ -2182,14 +2182,14 @@ components:
         artist:
           name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        releaseDate: 2000-01-23
+        releaseDate: '2000-01-23'
         description: description
         label:
           name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         title: title
         tracks:
-        - createdAt: 2000-01-23T04:56:07.000+00:00
+        - createdAt: '2000-01-23T04:56:07.000+00:00'
           trackNumber: 5
           artist: null
           stats:
@@ -2208,8 +2208,8 @@ components:
           lyrics:
             language: language
             text: text
-          updatedAt: 2000-01-23T04:56:07.000+00:00
-        - createdAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
+        - createdAt: '2000-01-23T04:56:07.000+00:00'
           trackNumber: 5
           artist: null
           stats:
@@ -2228,7 +2228,7 @@ components:
           lyrics:
             language: language
             text: text
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
         tags:
         - tags
         - tags
@@ -2237,7 +2237,7 @@ components:
           width: 6
           url: http://example.com/aeiou
           height: 1
-        createdAt: 2000-01-23T04:56:07.000+00:00
+        createdAt: '2000-01-23T04:56:07.000+00:00'
         stats:
           playCount: 9
           likeCount: 3
@@ -2250,7 +2250,7 @@ components:
         currency: EUR
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         releaseState: draft
-        updatedAt: 2000-01-23T04:56:07.000+00:00
+        updatedAt: '2000-01-23T04:56:07.000+00:00'
     AlbumCreateInput:
       required:
       - title
@@ -2334,14 +2334,14 @@ components:
         - artist:
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          releaseDate: 2000-01-23
+          releaseDate: '2000-01-23'
           description: description
           label:
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           title: title
           tracks:
-          - createdAt: 2000-01-23T04:56:07.000+00:00
+          - createdAt: '2000-01-23T04:56:07.000+00:00'
             trackNumber: 5
             artist: null
             stats:
@@ -2360,8 +2360,8 @@ components:
             lyrics:
               language: language
               text: text
-            updatedAt: 2000-01-23T04:56:07.000+00:00
-          - createdAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
+          - createdAt: '2000-01-23T04:56:07.000+00:00'
             trackNumber: 5
             artist: null
             stats:
@@ -2380,7 +2380,7 @@ components:
             lyrics:
               language: language
               text: text
-            updatedAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
           tags:
           - tags
           - tags
@@ -2389,7 +2389,7 @@ components:
             width: 6
             url: http://example.com/aeiou
             height: 1
-          createdAt: 2000-01-23T04:56:07.000+00:00
+          createdAt: '2000-01-23T04:56:07.000+00:00'
           stats:
             playCount: 9
             likeCount: 3
@@ -2402,18 +2402,18 @@ components:
           currency: EUR
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           releaseState: draft
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
         - artist:
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          releaseDate: 2000-01-23
+          releaseDate: '2000-01-23'
           description: description
           label:
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           title: title
           tracks:
-          - createdAt: 2000-01-23T04:56:07.000+00:00
+          - createdAt: '2000-01-23T04:56:07.000+00:00'
             trackNumber: 5
             artist: null
             stats:
@@ -2432,8 +2432,8 @@ components:
             lyrics:
               language: language
               text: text
-            updatedAt: 2000-01-23T04:56:07.000+00:00
-          - createdAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
+          - createdAt: '2000-01-23T04:56:07.000+00:00'
             trackNumber: 5
             artist: null
             stats:
@@ -2452,7 +2452,7 @@ components:
             lyrics:
               language: language
               text: text
-            updatedAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
           tags:
           - tags
           - tags
@@ -2461,7 +2461,7 @@ components:
             width: 6
             url: http://example.com/aeiou
             height: 1
-          createdAt: 2000-01-23T04:56:07.000+00:00
+          createdAt: '2000-01-23T04:56:07.000+00:00'
           stats:
             playCount: 9
             likeCount: 3
@@ -2474,7 +2474,7 @@ components:
           currency: EUR
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           releaseState: draft
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
         meta:
           total: 123
           limit: 20
@@ -2489,14 +2489,14 @@ components:
           artist:
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          releaseDate: 2000-01-23
+          releaseDate: '2000-01-23'
           description: description
           label:
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           title: title
           tracks:
-          - createdAt: 2000-01-23T04:56:07.000+00:00
+          - createdAt: '2000-01-23T04:56:07.000+00:00'
             trackNumber: 5
             artist: null
             stats:
@@ -2515,8 +2515,8 @@ components:
             lyrics:
               language: language
               text: text
-            updatedAt: 2000-01-23T04:56:07.000+00:00
-          - createdAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
+          - createdAt: '2000-01-23T04:56:07.000+00:00'
             trackNumber: 5
             artist: null
             stats:
@@ -2535,7 +2535,7 @@ components:
             lyrics:
               language: language
               text: text
-            updatedAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
           tags:
           - tags
           - tags
@@ -2544,7 +2544,7 @@ components:
             width: 6
             url: http://example.com/aeiou
             height: 1
-          createdAt: 2000-01-23T04:56:07.000+00:00
+          createdAt: '2000-01-23T04:56:07.000+00:00'
           stats:
             playCount: 9
             likeCount: 3
@@ -2557,7 +2557,7 @@ components:
           currency: EUR
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           releaseState: draft
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
     AlbumStats:
       type: object
       properties:
@@ -2601,7 +2601,7 @@ components:
           type: string
           format: date-time
       example:
-        createdAt: 2000-01-23T04:56:07.000+00:00
+        createdAt: '2000-01-23T04:56:07.000+00:00'
         trackNumber: 5
         artist: null
         stats:
@@ -2620,7 +2620,7 @@ components:
         lyrics:
           language: language
           text: text
-        updatedAt: 2000-01-23T04:56:07.000+00:00
+        updatedAt: '2000-01-23T04:56:07.000+00:00'
     AlbumRef:
       type: object
       properties:
@@ -2691,7 +2691,7 @@ components:
           $ref: "#/components/schemas/PaginationMeta"
       example:
         data:
-        - createdAt: 2000-01-23T04:56:07.000+00:00
+        - createdAt: '2000-01-23T04:56:07.000+00:00'
           trackNumber: 5
           artist: null
           stats:
@@ -2710,8 +2710,8 @@ components:
           lyrics:
             language: language
             text: text
-          updatedAt: 2000-01-23T04:56:07.000+00:00
-        - createdAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
+        - createdAt: '2000-01-23T04:56:07.000+00:00'
           trackNumber: 5
           artist: null
           stats:
@@ -2730,7 +2730,7 @@ components:
           lyrics:
             language: language
             text: text
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
         meta:
           total: 123
           limit: 20
@@ -2742,7 +2742,7 @@ components:
           $ref: "#/components/schemas/Track"
       example:
         data:
-          createdAt: 2000-01-23T04:56:07.000+00:00
+          createdAt: '2000-01-23T04:56:07.000+00:00'
           trackNumber: 5
           artist: null
           stats:
@@ -2761,7 +2761,7 @@ components:
           lyrics:
             language: language
             text: text
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
     MerchItem:
       type: object
       properties:
@@ -2806,7 +2806,7 @@ components:
           type: string
           format: date-time
       example:
-        createdAt: 2000-01-23T04:56:07.000+00:00
+        createdAt: '2000-01-23T04:56:07.000+00:00'
         images:
         - alt: alt
           width: 6
@@ -2842,7 +2842,7 @@ components:
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         availability: in_stock
         type: camiseta
-        updatedAt: 2000-01-23T04:56:07.000+00:00
+        updatedAt: '2000-01-23T04:56:07.000+00:00'
     Variant:
       type: object
       properties:
@@ -2964,7 +2964,7 @@ components:
           $ref: "#/components/schemas/PaginationMeta"
       example:
         data:
-        - createdAt: 2000-01-23T04:56:07.000+00:00
+        - createdAt: '2000-01-23T04:56:07.000+00:00'
           images:
           - alt: alt
             width: 6
@@ -3000,8 +3000,8 @@ components:
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           availability: in_stock
           type: camiseta
-          updatedAt: 2000-01-23T04:56:07.000+00:00
-        - createdAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
+        - createdAt: '2000-01-23T04:56:07.000+00:00'
           images:
           - alt: alt
             width: 6
@@ -3037,7 +3037,7 @@ components:
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           availability: in_stock
           type: camiseta
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
         meta:
           total: 123
           limit: 20
@@ -3049,7 +3049,7 @@ components:
           $ref: "#/components/schemas/MerchItem"
       example:
         data:
-          createdAt: 2000-01-23T04:56:07.000+00:00
+          createdAt: '2000-01-23T04:56:07.000+00:00'
           images:
           - alt: alt
             width: 6
@@ -3085,7 +3085,7 @@ components:
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           availability: in_stock
           type: camiseta
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
     Label:
       type: object
       properties:
@@ -3117,19 +3117,19 @@ components:
           format: date-time
       example:
         country: country
-        createdAt: 2000-01-23T04:56:07.000+00:00
+        createdAt: '2000-01-23T04:56:07.000+00:00'
         albums:
         - artist:
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          releaseDate: 2000-01-23
+          releaseDate: '2000-01-23'
           description: description
           label:
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           title: title
           tracks:
-          - createdAt: 2000-01-23T04:56:07.000+00:00
+          - createdAt: '2000-01-23T04:56:07.000+00:00'
             trackNumber: 5
             artist: null
             stats:
@@ -3148,8 +3148,8 @@ components:
             lyrics:
               language: language
               text: text
-            updatedAt: 2000-01-23T04:56:07.000+00:00
-          - createdAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
+          - createdAt: '2000-01-23T04:56:07.000+00:00'
             trackNumber: 5
             artist: null
             stats:
@@ -3168,7 +3168,7 @@ components:
             lyrics:
               language: language
               text: text
-            updatedAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
           tags:
           - tags
           - tags
@@ -3177,7 +3177,7 @@ components:
             width: 6
             url: http://example.com/aeiou
             height: 1
-          createdAt: 2000-01-23T04:56:07.000+00:00
+          createdAt: '2000-01-23T04:56:07.000+00:00'
           stats:
             playCount: 9
             likeCount: 3
@@ -3190,18 +3190,18 @@ components:
           currency: EUR
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           releaseState: draft
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
         - artist:
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          releaseDate: 2000-01-23
+          releaseDate: '2000-01-23'
           description: description
           label:
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           title: title
           tracks:
-          - createdAt: 2000-01-23T04:56:07.000+00:00
+          - createdAt: '2000-01-23T04:56:07.000+00:00'
             trackNumber: 5
             artist: null
             stats:
@@ -3220,8 +3220,8 @@ components:
             lyrics:
               language: language
               text: text
-            updatedAt: 2000-01-23T04:56:07.000+00:00
-          - createdAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
+          - createdAt: '2000-01-23T04:56:07.000+00:00'
             trackNumber: 5
             artist: null
             stats:
@@ -3240,7 +3240,7 @@ components:
             lyrics:
               language: language
               text: text
-            updatedAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
           tags:
           - tags
           - tags
@@ -3249,7 +3249,7 @@ components:
             width: 6
             url: http://example.com/aeiou
             height: 1
-          createdAt: 2000-01-23T04:56:07.000+00:00
+          createdAt: '2000-01-23T04:56:07.000+00:00'
           stats:
             playCount: 9
             likeCount: 3
@@ -3262,7 +3262,7 @@ components:
           currency: EUR
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           releaseState: draft
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
         artists:
         - name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -3272,7 +3272,7 @@ components:
         description: description
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         url: http://example.com/aeiou
-        updatedAt: 2000-01-23T04:56:07.000+00:00
+        updatedAt: '2000-01-23T04:56:07.000+00:00'
     LabelCreateInput:
       required:
       - name
@@ -3311,19 +3311,19 @@ components:
       example:
         data:
         - country: country
-          createdAt: 2000-01-23T04:56:07.000+00:00
+          createdAt: '2000-01-23T04:56:07.000+00:00'
           albums:
           - artist:
               name: name
               id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-            releaseDate: 2000-01-23
+            releaseDate: '2000-01-23'
             description: description
             label:
               name: name
               id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             title: title
             tracks:
-            - createdAt: 2000-01-23T04:56:07.000+00:00
+            - createdAt: '2000-01-23T04:56:07.000+00:00'
               trackNumber: 5
               artist: null
               stats:
@@ -3342,8 +3342,8 @@ components:
               lyrics:
                 language: language
                 text: text
-              updatedAt: 2000-01-23T04:56:07.000+00:00
-            - createdAt: 2000-01-23T04:56:07.000+00:00
+              updatedAt: '2000-01-23T04:56:07.000+00:00'
+            - createdAt: '2000-01-23T04:56:07.000+00:00'
               trackNumber: 5
               artist: null
               stats:
@@ -3362,7 +3362,7 @@ components:
               lyrics:
                 language: language
                 text: text
-              updatedAt: 2000-01-23T04:56:07.000+00:00
+              updatedAt: '2000-01-23T04:56:07.000+00:00'
             tags:
             - tags
             - tags
@@ -3371,7 +3371,7 @@ components:
               width: 6
               url: http://example.com/aeiou
               height: 1
-            createdAt: 2000-01-23T04:56:07.000+00:00
+            createdAt: '2000-01-23T04:56:07.000+00:00'
             stats:
               playCount: 9
               likeCount: 3
@@ -3384,18 +3384,18 @@ components:
             currency: EUR
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             releaseState: draft
-            updatedAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
           - artist:
               name: name
               id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-            releaseDate: 2000-01-23
+            releaseDate: '2000-01-23'
             description: description
             label:
               name: name
               id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             title: title
             tracks:
-            - createdAt: 2000-01-23T04:56:07.000+00:00
+            - createdAt: '2000-01-23T04:56:07.000+00:00'
               trackNumber: 5
               artist: null
               stats:
@@ -3414,8 +3414,8 @@ components:
               lyrics:
                 language: language
                 text: text
-              updatedAt: 2000-01-23T04:56:07.000+00:00
-            - createdAt: 2000-01-23T04:56:07.000+00:00
+              updatedAt: '2000-01-23T04:56:07.000+00:00'
+            - createdAt: '2000-01-23T04:56:07.000+00:00'
               trackNumber: 5
               artist: null
               stats:
@@ -3434,7 +3434,7 @@ components:
               lyrics:
                 language: language
                 text: text
-              updatedAt: 2000-01-23T04:56:07.000+00:00
+              updatedAt: '2000-01-23T04:56:07.000+00:00'
             tags:
             - tags
             - tags
@@ -3443,7 +3443,7 @@ components:
               width: 6
               url: http://example.com/aeiou
               height: 1
-            createdAt: 2000-01-23T04:56:07.000+00:00
+            createdAt: '2000-01-23T04:56:07.000+00:00'
             stats:
               playCount: 9
               likeCount: 3
@@ -3456,7 +3456,7 @@ components:
             currency: EUR
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             releaseState: draft
-            updatedAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
           artists:
           - name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -3466,21 +3466,21 @@ components:
           description: description
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           url: http://example.com/aeiou
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
         - country: country
-          createdAt: 2000-01-23T04:56:07.000+00:00
+          createdAt: '2000-01-23T04:56:07.000+00:00'
           albums:
           - artist:
               name: name
               id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-            releaseDate: 2000-01-23
+            releaseDate: '2000-01-23'
             description: description
             label:
               name: name
               id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             title: title
             tracks:
-            - createdAt: 2000-01-23T04:56:07.000+00:00
+            - createdAt: '2000-01-23T04:56:07.000+00:00'
               trackNumber: 5
               artist: null
               stats:
@@ -3499,8 +3499,8 @@ components:
               lyrics:
                 language: language
                 text: text
-              updatedAt: 2000-01-23T04:56:07.000+00:00
-            - createdAt: 2000-01-23T04:56:07.000+00:00
+              updatedAt: '2000-01-23T04:56:07.000+00:00'
+            - createdAt: '2000-01-23T04:56:07.000+00:00'
               trackNumber: 5
               artist: null
               stats:
@@ -3519,7 +3519,7 @@ components:
               lyrics:
                 language: language
                 text: text
-              updatedAt: 2000-01-23T04:56:07.000+00:00
+              updatedAt: '2000-01-23T04:56:07.000+00:00'
             tags:
             - tags
             - tags
@@ -3528,7 +3528,7 @@ components:
               width: 6
               url: http://example.com/aeiou
               height: 1
-            createdAt: 2000-01-23T04:56:07.000+00:00
+            createdAt: '2000-01-23T04:56:07.000+00:00'
             stats:
               playCount: 9
               likeCount: 3
@@ -3541,18 +3541,18 @@ components:
             currency: EUR
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             releaseState: draft
-            updatedAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
           - artist:
               name: name
               id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-            releaseDate: 2000-01-23
+            releaseDate: '2000-01-23'
             description: description
             label:
               name: name
               id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             title: title
             tracks:
-            - createdAt: 2000-01-23T04:56:07.000+00:00
+            - createdAt: '2000-01-23T04:56:07.000+00:00'
               trackNumber: 5
               artist: null
               stats:
@@ -3571,8 +3571,8 @@ components:
               lyrics:
                 language: language
                 text: text
-              updatedAt: 2000-01-23T04:56:07.000+00:00
-            - createdAt: 2000-01-23T04:56:07.000+00:00
+              updatedAt: '2000-01-23T04:56:07.000+00:00'
+            - createdAt: '2000-01-23T04:56:07.000+00:00'
               trackNumber: 5
               artist: null
               stats:
@@ -3591,7 +3591,7 @@ components:
               lyrics:
                 language: language
                 text: text
-              updatedAt: 2000-01-23T04:56:07.000+00:00
+              updatedAt: '2000-01-23T04:56:07.000+00:00'
             tags:
             - tags
             - tags
@@ -3600,7 +3600,7 @@ components:
               width: 6
               url: http://example.com/aeiou
               height: 1
-            createdAt: 2000-01-23T04:56:07.000+00:00
+            createdAt: '2000-01-23T04:56:07.000+00:00'
             stats:
               playCount: 9
               likeCount: 3
@@ -3613,7 +3613,7 @@ components:
             currency: EUR
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             releaseState: draft
-            updatedAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
           artists:
           - name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -3623,7 +3623,7 @@ components:
           description: description
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           url: http://example.com/aeiou
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
         meta:
           total: 123
           limit: 20
@@ -3636,19 +3636,19 @@ components:
       example:
         data:
           country: country
-          createdAt: 2000-01-23T04:56:07.000+00:00
+          createdAt: '2000-01-23T04:56:07.000+00:00'
           albums:
           - artist:
               name: name
               id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-            releaseDate: 2000-01-23
+            releaseDate: '2000-01-23'
             description: description
             label:
               name: name
               id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             title: title
             tracks:
-            - createdAt: 2000-01-23T04:56:07.000+00:00
+            - createdAt: '2000-01-23T04:56:07.000+00:00'
               trackNumber: 5
               artist: null
               stats:
@@ -3667,8 +3667,8 @@ components:
               lyrics:
                 language: language
                 text: text
-              updatedAt: 2000-01-23T04:56:07.000+00:00
-            - createdAt: 2000-01-23T04:56:07.000+00:00
+              updatedAt: '2000-01-23T04:56:07.000+00:00'
+            - createdAt: '2000-01-23T04:56:07.000+00:00'
               trackNumber: 5
               artist: null
               stats:
@@ -3687,7 +3687,7 @@ components:
               lyrics:
                 language: language
                 text: text
-              updatedAt: 2000-01-23T04:56:07.000+00:00
+              updatedAt: '2000-01-23T04:56:07.000+00:00'
             tags:
             - tags
             - tags
@@ -3696,7 +3696,7 @@ components:
               width: 6
               url: http://example.com/aeiou
               height: 1
-            createdAt: 2000-01-23T04:56:07.000+00:00
+            createdAt: '2000-01-23T04:56:07.000+00:00'
             stats:
               playCount: 9
               likeCount: 3
@@ -3709,18 +3709,18 @@ components:
             currency: EUR
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             releaseState: draft
-            updatedAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
           - artist:
               name: name
               id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-            releaseDate: 2000-01-23
+            releaseDate: '2000-01-23'
             description: description
             label:
               name: name
               id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             title: title
             tracks:
-            - createdAt: 2000-01-23T04:56:07.000+00:00
+            - createdAt: '2000-01-23T04:56:07.000+00:00'
               trackNumber: 5
               artist: null
               stats:
@@ -3739,8 +3739,8 @@ components:
               lyrics:
                 language: language
                 text: text
-              updatedAt: 2000-01-23T04:56:07.000+00:00
-            - createdAt: 2000-01-23T04:56:07.000+00:00
+              updatedAt: '2000-01-23T04:56:07.000+00:00'
+            - createdAt: '2000-01-23T04:56:07.000+00:00'
               trackNumber: 5
               artist: null
               stats:
@@ -3759,7 +3759,7 @@ components:
               lyrics:
                 language: language
                 text: text
-              updatedAt: 2000-01-23T04:56:07.000+00:00
+              updatedAt: '2000-01-23T04:56:07.000+00:00'
             tags:
             - tags
             - tags
@@ -3768,7 +3768,7 @@ components:
               width: 6
               url: http://example.com/aeiou
               height: 1
-            createdAt: 2000-01-23T04:56:07.000+00:00
+            createdAt: '2000-01-23T04:56:07.000+00:00'
             stats:
               playCount: 9
               likeCount: 3
@@ -3781,7 +3781,7 @@ components:
             currency: EUR
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             releaseState: draft
-            updatedAt: 2000-01-23T04:56:07.000+00:00
+            updatedAt: '2000-01-23T04:56:07.000+00:00'
           artists:
           - name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -3791,7 +3791,7 @@ components:
           description: description
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           url: http://example.com/aeiou
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
     Comment:
       type: object
       properties:
@@ -3837,7 +3837,7 @@ components:
           items:
             $ref: "#/components/schemas/Comment"
       example:
-        createdAt: 2000-01-23T04:56:07.000+00:00
+        createdAt: '2000-01-23T04:56:07.000+00:00'
         targetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         replies:
         - null
@@ -3849,7 +3849,7 @@ components:
         userId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         status: visible
         likes: 6
-        updatedAt: 2000-01-23T04:56:07.000+00:00
+        updatedAt: '2000-01-23T04:56:07.000+00:00'
     CommentCreateInput:
       required:
       - text
@@ -3881,7 +3881,7 @@ components:
           $ref: "#/components/schemas/PaginationMeta"
       example:
         data:
-        - createdAt: 2000-01-23T04:56:07.000+00:00
+        - createdAt: '2000-01-23T04:56:07.000+00:00'
           targetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           replies:
           - null
@@ -3893,8 +3893,8 @@ components:
           userId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           status: visible
           likes: 6
-          updatedAt: 2000-01-23T04:56:07.000+00:00
-        - createdAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
+        - createdAt: '2000-01-23T04:56:07.000+00:00'
           targetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           replies:
           - null
@@ -3906,7 +3906,7 @@ components:
           userId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           status: visible
           likes: 6
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
         meta:
           total: 123
           limit: 20
@@ -3918,7 +3918,7 @@ components:
           $ref: "#/components/schemas/Comment"
       example:
         data:
-          createdAt: 2000-01-23T04:56:07.000+00:00
+          createdAt: '2000-01-23T04:56:07.000+00:00'
           targetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           replies:
           - null
@@ -3930,7 +3930,7 @@ components:
           userId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           status: visible
           likes: 6
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
     albumId_tracks_body:
       type: object
       properties:
@@ -3979,7 +3979,7 @@ components:
           format: date-time
       example:
         url: http://example.com/aeiou
-        expiresAt: 2000-01-23T04:56:07.000+00:00
+        expiresAt: '2000-01-23T04:56:07.000+00:00'
     trackId_lyrics_body:
       required:
       - text
@@ -4087,7 +4087,7 @@ components:
             $ref: "#/components/schemas/Comment"
       example:
         data:
-        - createdAt: 2000-01-23T04:56:07.000+00:00
+        - createdAt: '2000-01-23T04:56:07.000+00:00'
           targetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           replies:
           - null
@@ -4099,8 +4099,8 @@ components:
           userId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           status: visible
           likes: 6
-          updatedAt: 2000-01-23T04:56:07.000+00:00
-        - createdAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
+        - createdAt: '2000-01-23T04:56:07.000+00:00'
           targetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           replies:
           - null
@@ -4112,7 +4112,7 @@ components:
           userId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           status: visible
           likes: 6
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          updatedAt: '2000-01-23T04:56:07.000+00:00'
     commentId_replies_body:
       required:
       - text
