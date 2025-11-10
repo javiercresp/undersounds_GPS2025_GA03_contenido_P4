@@ -4,7 +4,6 @@
 // -------- PRISMA ROBUST LOADER --------
 let prisma;
 try {
-  // Intenta cargar tu singleton si existe
   const prismaModule = require('../src/db/prisma');
   prisma = prismaModule?.prisma || prismaModule?.default || prismaModule;
   if (!prisma) {
@@ -12,7 +11,6 @@ try {
     prisma = new PrismaClient();
   }
 } catch (e) {
-  // Fallback: cliente directo
   const { PrismaClient } = require('@prisma/client');
   prisma = new PrismaClient();
 }
@@ -42,7 +40,6 @@ exports.albumsAlbumIdCommentsGET = async function (albumId, page, limit) {
   const pageSize = toInt(limit, 20);
   const skip = (pageNum - 1) * pageSize;
 
-  // Ajusta este where si tu Comment se relaciona de otra forma
   const where = { targetType: 'album', targetId: albumId };
 
   const [data, total] = await Promise.all([
@@ -70,11 +67,10 @@ exports.albumsAlbumIdCommentsPOST = async function (body, albumId) {
 // ----------------- COVER -----------------
 
 exports.albumsAlbumIdCoverPOST = async function (albumId /*, body */) {
-  // Ejemplo simple: crea imagen y enlaza
   const createdImage = await prisma.image.create({
     data: {
-      url: '',      // TODO: body.url / URL del uploader
-      alt: 'cover', // TODO: body.alt
+      url: '',      
+      alt: 'cover', 
       width: null,
       height: null,
     },
@@ -82,7 +78,7 @@ exports.albumsAlbumIdCoverPOST = async function (albumId /*, body */) {
 
   const updated = await prisma.album.update({
     where: { id: albumId },
-    data: { coverId: createdImage.id }, // en 1–1, coverId debe ser @unique
+    data: { coverId: createdImage.id },
     include: { cover: true, tracks: true, label: true, stats: true, artist: true },
   });
 
@@ -98,7 +94,7 @@ exports.albumsAlbumIdDELETE = async function (albumId, hard) {
   }
   await prisma.album.update({
     where: { id: albumId },
-    data: { releaseState: 'archived' }, // o deletedAt: new Date()
+    data: { releaseState: 'archived' },
   });
 };
 
@@ -115,8 +111,8 @@ exports.albumsAlbumIdGET = async function (albumId, include) {
   return { data: album };
 };
 
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-// PATCH con normalización coherente de genres/tags
+// ----------------- PATCH ÁLBUM -----------------
+
 exports.albumsAlbumIdPATCH = async function (body, albumId) {
   const patch = {
     title: body?.title,
@@ -127,23 +123,18 @@ exports.albumsAlbumIdPATCH = async function (body, albumId) {
     releaseState: body?.releaseState,
   };
 
-  // Si vienen en el body, los tratamos:
-  if (body && Object.prototype.hasOwnProperty.call(body, 'genres')) {
+  // Normaliza genres/tags según tu esquema (aquí asumimos CSV en BD)
+  if (Object.prototype.hasOwnProperty.call(body ?? {}, 'genres')) {
     patch.genres = Array.isArray(body.genres)
-      ? body.genres
-      : (typeof body.genres === 'string'
-          ? body.genres.split(',').map(s => s.trim()).filter(Boolean)
-          : []); // default si envían null/undefined
+      ? body.genres.join(',')
+      : (typeof body.genres === 'string' ? body.genres : '');
   }
-  if (body && Object.prototype.hasOwnProperty.call(body, 'tags')) {
+  if (Object.prototype.hasOwnProperty.call(body ?? {}, 'tags')) {
     patch.tags = Array.isArray(body.tags)
-      ? body.tags.join(',') // a CSV si schema.tags es String
-      : (typeof body.tags === 'string'
-          ? body.tags
-          : '');
+      ? body.tags.join(',')
+      : (typeof body.tags === 'string' ? body.tags : '');
   }
 
-  // Limpia undefined
   Object.keys(patch).forEach(k => patch[k] === undefined && delete patch[k]);
 
   const updated = await prisma.album.update({
@@ -154,101 +145,130 @@ exports.albumsAlbumIdPATCH = async function (body, albumId) {
 
   return { data: updated };
 };
-// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-// POST con normalización y defaults de genres/tags
+// ----------------- POST ÁLBUM -----------------
+
 exports.albumsPOST = async function (body) {
   console.log('[albumsPOST] body =', body);
+  try {
+    const {
+      title,
+      description = null,
+      releaseDate = null,
+      price = null,
+      currency = null,
+      genres = [],   // llega array por OpenAPI
+      tags = [],     // llega array por OpenAPI
+      artistId,
+      labelId,
+      // coverId, coverUrl, coverAlt, coverWidth, coverHeight
+    } = body || {};
 
-  const genresValue =
-    Array.isArray(body?.genres)
-      ? body.genres
-      : (typeof body?.genres === 'string'
-          ? body.genres.split(',').map(s => s.trim()).filter(Boolean)
-          : []); // por defecto []
+    if (!title)     return { data: { message: 'title is required' }, status: 400 };
+    if (!artistId)  return { data: { message: 'artistId is required' }, status: 400 };
+    if (!labelId)   return { data: { message: 'labelId is required' }, status: 400 };
 
-  const tagsValue =
-    Array.isArray(body?.tags)
-      ? body.tags.join(',') // si envían array pero schema.tags es String, convierte a CSV
-      : (typeof body?.tags === 'string'
-          ? body.tags
-          : ''); // por defecto ""
+    // Ajusta a tu esquema de BD:
+    // Si en Prisma genres/tags son String CSV:
+    const genresStr = Array.isArray(genres) ? genres.filter(Boolean).join(',') : '';
+    const tagsStr   = Array.isArray(tags)   ? tags.filter(Boolean).join(',')   : '';
 
-  const data = {
-    title: body?.title,
-    description: body?.description ?? null,
-    price: body?.price ?? null,
-    currency: body?.currency ?? null,
-    releaseDate: body?.releaseDate ? new Date(body.releaseDate) : null,
-    releaseState: body?.releaseState ?? 'draft',
-    // En schema actual `genres` y `tags` son String (CSV). Normalizamos:
-    genres: Array.isArray(genresValue) ? genresValue.join(',') : (typeof genresValue === 'string' ? genresValue : ''),
-    tags: tagsValue,     // String (CSV)
-    // Nota: relaciones (artist/label) se conectan más abajo para evitar errores de tipos
-  };
-
-  // Conecta artist/label si vienen ids. Usamos connectOrCreate para crear registros mínimos si no existen
-  if (body?.artistId) {
-    data.artist = {
-      connectOrCreate: {
-        where: { id: body.artistId },
-        create: { id: body.artistId, name: body?.artistName ?? 'unknown artist' },
-      },
+    const data = {
+      title,
+      description,
+      releaseDate: releaseDate ? new Date(releaseDate) : null,
+      price,
+      currency,
+      releaseState: 'draft',
+      genres: genresStr, // si usas arrays en BD, guarda 'genres' directamente
+      tags: tagsStr,     // idem
+      artist: { connect: { id: artistId } },
+      label:  { connect: { id: labelId } },
     };
-  }
-  if (body?.labelId) {
-    data.label = {
-      connectOrCreate: {
-        where: { id: body.labelId },
-        create: { id: body.labelId, name: body?.labelName ?? 'unknown label' },
-      },
-    };
-  }
 
-  // cover es requerido en schema; si el cliente no envía coverId creamos una imagen mínima
-  if (body?.coverId) {
-    data.cover = { connect: { id: body.coverId } };
-  } else {
-    data.cover = { create: { url: body?.coverUrl ?? '', alt: body?.coverAlt ?? 'cover', width: Number.isFinite(body?.coverWidth) ? body.coverWidth : 0, height: Number.isFinite(body?.coverHeight) ? body.coverHeight : 0 } };
+    // Portada: si tu relación cover es obligatoria, crea una mínima.
+    // Si no lo es, comenta esto.
+    data.cover = { create: { url: '', alt: 'cover', width: 0, height: 0 } };
+
+    const created = await prisma.album.create({ data });
+    return { data: created, status: 201 };
+  } catch (err) {
+    console.error('[albumsPOST] error', err?.code, err?.meta, err);
+    return { data: { message: 'Internal Server Error' }, status: 500 };
   }
-
-  // Elimina undefined (dejamos null si lo pusimos explícitamente)
-  Object.keys(data).forEach(k => data[k] === undefined && delete data[k]);
-
-  const created = await prisma.album.create({ data });
-  return { data: created };
 };
-// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 // ----------------- TRACKS -----------------
 
 exports.albumsAlbumIdTracksPOST = async function (body, albumId) {
-  const tracks = Array.isArray(body?.tracks) ? body.tracks : [];
-  if (!tracks.length) {
-    const err = new Error('Debes enviar al menos una pista en body.tracks');
-    err.status = 400;
-    throw err;
+  try {
+    const tracksIn = Array.isArray(body?.tracks) ? body.tracks : [];
+
+    // No obligamos a enviar pistas: si no hay, devolvemos el álbum tal cual
+    if (!tracksIn.length) {
+      const out = await prisma.album.findUnique({
+        where: { id: albumId },
+        include: { tracks: true, label: true, stats: true, artist: true, cover: true },
+      });
+      return { data: out, status: 200 };
+    }
+
+    // Cargamos el álbum para heredar relaciones
+    const album = await prisma.album.findUnique({
+      where: { id: albumId },
+      select: { id: true, artistId: true, labelId: true },
+    });
+    if (!album) return { data: { message: 'Album not found' }, status: 404 };
+
+    // Verificamos si el label realmente existe (por si te lo inventaste)
+    let labelExists = false;
+    if (album.labelId) {
+      const lab = await prisma.label.findUnique({ where: { id: album.labelId }, select: { id: true } });
+      labelExists = !!lab;
+    }
+
+    const clean = (s) => (typeof s === 'string' ? s.trim() : '');
+    const toCreate = tracksIn
+      .map((t, i) => ({
+        title: clean(t?.title),
+        trackNumber: t?.trackNumber ?? i + 1,
+        durationSec: t?.durationSec ?? null,
+      }))
+      .filter(t => t.title);
+
+    if (!toCreate.length) {
+      const out = await prisma.album.findUnique({
+        where: { id: albumId },
+        include: { tracks: true, label: true, stats: true, artist: true, cover: true },
+      });
+      return { data: out, status: 200 };
+    }
+
+    await prisma.$transaction(
+      toCreate.map((t) =>
+        prisma.track.create({
+          data: {
+            title: t.title,
+            trackNumber: t.trackNumber,
+            durationSec: t.durationSec,
+            album:  { connect: { id: album.id } }, // siempre
+            ...(album.artistId ? { artist: { connect: { id: album.artistId } } } : {}),
+            ...(labelExists    ? { label:  { connect: { id: album.labelId } } } : {}),
+          },
+        })
+      )
+    );
+
+    const updated = await prisma.album.findUnique({
+      where: { id: albumId },
+      include: { tracks: true, label: true, stats: true, artist: true, cover: true },
+    });
+
+    return { data: updated, status: 201 };
+  } catch (err) {
+    console.error('[albumsAlbumIdTracksPOST] error', err?.code, err?.meta, err);
+    return { data: { message: 'Internal Server Error' }, status: 500 };
   }
-
-  const updated = await prisma.album.update({
-    where: { id: albumId },
-    data: {
-      tracks: {
-        create: tracks.map(t => ({
-          title: t.title,
-          durationSec: t.durationSec ?? null,
-          trackNumber: t.trackNumber ?? null,
-          // audio / lyrics anidados si existen:
-          // audio: t.audio ? { create: { ...t.audio } } : undefined,
-          // lyrics: t.lyrics ? { create: { ...t.lyrics } } : undefined,
-        })),
-      },
-    },
-    include: { tracks: true, label: true, stats: true, artist: true, cover: true },
-  });
-
-  return { data: updated };
 };
 
 exports.albumsAlbumIdTracksTrackIdDELETE = async function (albumId, trackId) {
@@ -270,11 +290,7 @@ exports.albumsGET = async function (
   if (labelId) where.labelId = labelId;
   if (releaseState) where.releaseState = releaseState;
 
-  // Si genres/tags son String[] en Prisma:
-  // if (genre) where.genres = { has: genre };
-  // if (tag)   where.tags   = { has: tag };
-
-  // Si son String CSV:
+  // Si usas CSV en BD:
   if (genre) where.genres = like(genre);
   if (tag)   where.tags   = like(tag);
 
