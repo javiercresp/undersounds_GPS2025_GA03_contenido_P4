@@ -58,6 +58,8 @@ exports.tracksGET = async function (
   const pageSize = toInt(limit, 20);
   const skip = (pageNum - 1) * pageSize;
 
+  // Filtrado
+
   const trackFilters = {};
   if (q) {
     trackFilters.title = { contains: q };
@@ -89,11 +91,18 @@ exports.tracksGET = async function (
     ...(Object.keys(albumWhere).length ? { album: albumWhere } : {}),
   };
 
+  // Ordenación
+  const validSortFields = ["durationSec", "title", "createdAt"];
+  const validOrder = ["asc", "desc"];
+
+  const sortField = validSortFields.includes(sort) ? sort : "createdAt";
+  const sortOrder = validOrder.includes(order) ? order : "desc";
+
   const [rows, total] = await Promise.all([
     prisma.track.findMany({
       where,
       include: buildInclude(include),
-      orderBy: { createdAt: "desc" },
+      orderBy: { [sortField]: sortOrder },
       skip,
       take: pageSize,
     }),
