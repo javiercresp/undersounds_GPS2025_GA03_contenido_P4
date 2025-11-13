@@ -6,7 +6,7 @@ const express = require('express');           // ✅ NUEVO
 const oas3Tools = require('oas3-tools');
 const cors = require('cors');                 // ✅ NUEVO
 
-const serverPort = 8080;
+const serverPort = parseInt(process.env.PORT, 10) || 8081;
 
 // Config swagger/oas3-tools
 const options = {
