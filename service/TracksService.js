@@ -358,41 +358,17 @@ exports.tracksTrackIdDELETE = function (trackId) {
  * include List Campos relacionados a incluir, separados por coma. Ej. `tracks,label,stats` (optional)
  * returns TrackResponse
  **/
-exports.tracksTrackIdGET = function (trackId, include) {
-  return new Promise(function (resolve, reject) {
-    var examples = {};
-    examples["application/json"] = {
-      data: {
-        createdAt: "2000-01-23T04:56:07.000+00:00",
-        trackNumber: 5,
-        stats: {
-          playCount: 7,
-        },
-        album: {
-          id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          title: "title",
-        },
-        id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-        audio: {
-          codec: "codec",
-          bitrate: 2,
-          url: "http://example.com/aeiou",
-        },
-        title: "title",
-        durationSec: 5,
-        lyrics: {
-          language: "language",
-          text: "text",
-        },
-        updatedAt: "2000-01-23T04:56:07.000+00:00",
-      },
-    };
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
+exports.tracksTrackIdGET = async function (trackId, include) {
+  const track = await prisma.track.findUnique({
+    where: { id: trackId },
+    include: buildInclude(include),
   });
+  if (!track) {
+    const err = new Error('Track not found');
+    err.status = 404;
+    throw err;
+  }
+  return { data: track };
 };
 
 /**
@@ -446,41 +422,29 @@ exports.tracksTrackIdLyricsPOST = function (body, trackId) {
  * trackId UUID
  * returns TrackResponse
  **/
-exports.tracksTrackIdPATCH = function (body, trackId) {
-  return new Promise(function (resolve, reject) {
-    var examples = {};
-    examples["application/json"] = {
-      data: {
-        createdAt: "2000-01-23T04:56:07.000+00:00",
-        trackNumber: 5,
-        stats: {
-          playCount: 7,
-        },
-        album: {
-          id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          title: "title",
-        },
-        id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-        audio: {
-          codec: "codec",
-          bitrate: 2,
-          url: "http://example.com/aeiou",
-        },
-        title: "title",
-        durationSec: 5,
-        lyrics: {
-          language: "language",
-          text: "text",
-        },
-        updatedAt: "2000-01-23T04:56:07.000+00:00",
-      },
-    };
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
+exports.tracksTrackIdPATCH = async function (body, trackId) {
+  try {
+    const patch = {};
+    if (Object.prototype.hasOwnProperty.call(body ?? {}, 'title')) patch.title = body.title;
+    if (Object.prototype.hasOwnProperty.call(body ?? {}, 'durationSec')) patch.durationSec = body.durationSec ? Number(body.durationSec) : null;
+    if (Object.prototype.hasOwnProperty.call(body ?? {}, 'trackNumber')) patch.trackNumber = body.trackNumber ? Number(body.trackNumber) : null;
+
+    Object.keys(patch).forEach(k => patch[k] === undefined && delete patch[k]);
+
+    if (Object.keys(patch).length === 0) {
+      return { data: { message: 'No fields to update' }, status: 400 };
     }
-  });
+
+    const updated = await prisma.track.update({
+      where: { id: trackId },
+      data: patch,
+      include: { album: true, audio: true, lyrics: true, stats: true },
+    });
+    return { data: updated };
+  } catch (err) {
+    console.error('[tracksTrackIdPATCH] error', err?.message || err);
+    return { data: { message: err?.message || 'Internal Server Error' }, status: 500 };
+  }
 };
 
 /**

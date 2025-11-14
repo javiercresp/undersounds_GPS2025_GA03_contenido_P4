@@ -10,7 +10,7 @@ servers:
   description: SwaggerHub API Auto Mocking
 - url: https://api.undersound.example.com/v1
   description: Producción
-- url: http://localhost:8080
+- url: http://localhost:8081
   description: Local
 security:
 - oauth2:

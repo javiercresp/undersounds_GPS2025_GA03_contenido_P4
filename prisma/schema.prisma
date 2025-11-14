@@ -10,61 +10,64 @@ datasource db {
 }
 
 model Album {
-  id          String   @id @default(uuid())
-  title       String
-  description String?
-  artist      Artist   @relation(fields: [artistId], references: [id])
-  artistId    String
-  label       Label    @relation(fields: [labelId], references: [id])
-  labelId     String
-  releaseDate DateTime
-  releaseState String   // draft, scheduled, published, archived
-  price       Float
-  currency    String
-  genres      String    // Cambiado de String[] a String
-  tags        String    // Cambiado de String[] a String
-  cover       Image    @relation(fields: [coverId], references: [id])
-  coverId     String   @unique  // Relación uno a uno, clave única
-  tracks      Track[]
-  stats       AlbumStats?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String      @id @default(uuid())
+  title        String
+  description  String?
+  artist       Artist      @relation(fields: [artistId], references: [id])
+  artistId     String
+  label        Label       @relation(fields: [labelId], references: [id])
+  labelId      String
+  releaseDate  DateTime
+  releaseState String // draft, scheduled, published, archived
+  price        Float
+  currency     String
+  genres       String // Cambiado de String[] a String
+  tags         String // Cambiado de String[] a String
+  cover        Image       @relation(fields: [coverId], references: [id])
+  coverId      String      @unique // Relación uno a uno, clave única
+  tracks       Track[]
+  stats        AlbumStats?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 model Track {
-  id          String   @id @default(uuid())
+  id          String      @id @default(uuid())
   title       String
   trackNumber Int
   durationSec Int
-  album       Album    @relation(fields: [albumId], references: [id])
+  album       Album       @relation(fields: [albumId], references: [id])
   albumId     String
   audio       Audio?
   lyrics      Lyrics?
   stats       TrackStats?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  favorites   Favorite[]  // Relación inversa
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  favorites   Favorite[] // Relación inversa
 }
 
 model Artist {
-  id    String  @id @default(uuid())
-  name  String
-  albums Album[]  // Relación inversa
+  id     String      @id @default(uuid())
+  name   String
+  albums Album[] // Relación inversa
+  merch  MerchItem[] @relation("ArtistMerch")
 }
 
 model Label {
-  id    String  @id @default(uuid())
-  name  String  @unique
-  albums Album[]  // Relación inversa
+  id     String      @id @default(uuid())
+  name   String      @unique
+  albums Album[] // Relación inversa
+  merch  MerchItem[] @relation("LabelMerch")
 }
 
 model Image {
-  id    String @id @default(uuid())
-  alt   String?
-  width Int
-  height Int
-  url   String
-  album Album? @relation // Relación inversa
+  id        String     @id @default(uuid())
+  alt       String?
+  width     Int
+  height    Int
+  url       String
+  album     Album?     @relation // Relación inversa
+  merchItem MerchItem? @relation("MerchCover")
 }
 
 model Audio {
@@ -73,7 +76,7 @@ model Audio {
   bitrate Int
   url     String
   track   Track  @relation(fields: [trackId], references: [id])
-  trackId String @unique  // Relación uno a uno, clave única
+  trackId String @unique // Relación uno a uno, clave única
 }
 
 model Lyrics {
@@ -81,28 +84,66 @@ model Lyrics {
   language String
   text     String
   track    Track  @relation(fields: [trackId], references: [id])
-  trackId  String @unique  // Relación uno a uno, clave única
+  trackId  String @unique // Relación uno a uno, clave única
 }
 
 model AlbumStats {
-  id          String @id @default(uuid())
-  playCount   Int
-  likeCount   Int
-  ratingAvg   Float
+  id           String  @id @default(uuid())
+  playCount    Int
+  likeCount    Int
+  ratingAvg    Float
   commentCount Int
-  album       Album?  @relation(fields: [albumId], references: [id])
-  albumId     String? @unique  // Relación uno a uno, clave única
+  album        Album?  @relation(fields: [albumId], references: [id])
+  albumId      String? @unique // Relación uno a uno, clave única
 }
 
 model TrackStats {
-  id          String @id @default(uuid())
-  playCount   Int
-  track       Track  @relation(fields: [trackId], references: [id])
-  trackId     String @unique  // Relación uno a uno, clave única
+  id        String @id @default(uuid())
+  playCount Int
+  track     Track  @relation(fields: [trackId], references: [id])
+  trackId   String @unique // Relación uno a uno, clave única
 }
 
 model Favorite {
   id      String @id @default(uuid())
   track   Track  @relation(fields: [trackId], references: [id])
-  trackId String @unique  // Relación uno a uno, clave única
+  trackId String @unique // Relación uno a uno, clave única
+}
+
+enum MerchCategory {
+  SHIRT
+  HOODIE
+  POSTER
+  VINYL
+  CD
+  STICKER
+  OTHER
+}
+
+model MerchItem {
+  id          String        @id @default(uuid())
+  title       String
+  description String?
+  category    MerchCategory @default(OTHER)
+
+  // Guardar precios en céntimos es más robusto con SQLite
+  priceCents Int
+  currency   String @default("EUR")
+
+  stock  Int     @default(0)
+  sku    String? @unique
+  active Boolean @default(true)
+
+  // Relaciones (opcionales) — NOMBRADAS para evitar choques con otras
+  artist   Artist? @relation(name: "ArtistMerch", fields: [artistId], references: [id])
+  artistId String?
+  label    Label?  @relation(name: "LabelMerch", fields: [labelId], references: [id])
+  labelId  String?
+
+  // Portada opcional; la hacemos 1–1 (coverId único) y relación NOMBRADA
+  cover   Image?  @relation(name: "MerchCover", fields: [coverId], references: [id])
+  coverId String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
