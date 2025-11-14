@@ -31,6 +31,18 @@ model Album {
   updatedAt    DateTime    @updatedAt
 }
 
+model Comment {
+  id         String   @id @default(uuid())        // identificador único
+  targetId   String                                // id del álbum, track, merch...
+  targetType String                                // "album", "track", "merch"
+  text       String?                               // texto opcional
+  rating     Int?                                  // puntuación opcional
+  userId     String?                               // usuario que comenta
+  status     String   @default("visible")          // estado: visible/hidden/etc.
+  createdAt  DateTime @default(now())              // fecha de creación
+  updatedAt  DateTime @updatedAt                   // fecha de actualización
+}
+
 model Track {
   id          String      @id @default(uuid())
   title       String

@@ -4,7 +4,7 @@ var utils = require('../utils/writer.js');
 var Comments = require('../service/CommentsService');
 
 module.exports.albumsAlbumIdCommentsGET = function albumsAlbumIdCommentsGET (req, res, next, albumId, page, limit) {
-  Comments.albumsAlbumIdCommentsGET(albumId, page, limit)
+  Comments.albumsAlbumIdCommentsGET(limit, albumId, page)
     .then(function (response) {
       utils.writeJson(res, response);
     })
