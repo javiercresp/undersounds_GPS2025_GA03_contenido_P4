@@ -20,16 +20,32 @@ const toInt = (v, def) => {
 };
 
 const buildInclude = (includeCsv) => {
-  if (!includeCsv)
-    return { album: true, audio: true, lyrics: true, stats: true };
-  const parts = String(includeCsv)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const include = {};
   const allowed = ["album", "audio", "lyrics", "stats"];
-  for (const p of parts) if (allowed.includes(p)) include[p] = true;
-  // ensure defaults
+  // Default: include all relations
+  if (!includeCsv) {
+    const d = {};
+    for (const a of allowed) d[a] = true;
+    return d;
+  }
+
+  // Normalize input: accept CSV string, array, or single string
+  let parts = [];
+  if (Array.isArray(includeCsv)) {
+    parts = includeCsv.map(String).map((s) => s.trim()).filter(Boolean);
+  } else if (typeof includeCsv === 'string') {
+    parts = includeCsv.split(',').map((s) => s.trim()).filter(Boolean);
+  } else if (includeCsv && typeof includeCsv === 'object') {
+    // If router provides an object (sometimes frameworks do), extract keys
+    parts = Object.keys(includeCsv).map(String).map((s) => s.trim()).filter(Boolean);
+  } else {
+    parts = [String(includeCsv)];
+  }
+
+  const include = {};
+  for (const p of parts) {
+    if (allowed.includes(p)) include[p] = true;
+  }
+  // ensure defaults (explicit booleans expected by Prisma)
   for (const a of allowed) if (include[a] === undefined) include[a] = false;
   return include;
 };
@@ -164,39 +180,8 @@ exports.tracksPOST = async function (body) {
   return { data: created };
 };
 
-exports.tracksTrackIdAudioPOST = async function (trackId) {
-  // This endpoint would normally accept multipart/form-data or a JSON body with audio metadata/url
-  // For simplicity we expect JSON in body-like form (not available here). We'll implement a minimal helper
-  throw new Error(
-    "Not implemented: use tracksTrackIdAudioPOST with request body in controllers to supply audio data"
-  );
-};
-
-exports.tracksTrackIdLyricsPOST = async function (body, trackId) {
-  // Upsert lyrics for a given track
-  const t = await prisma.track.findUnique({ where: { id: trackId } });
-  if (!t) {
-    const err = new Error(`Track with id ${trackId} not found`);
-    err.status = 400;
-    throw err;
-  }
-
-  const upserted = await prisma.track.update({
-    where: { id: trackId },
-    data: {
-      lyrics: {
-        upsert: {
-          create: { language: body.language ?? null, text: body.text ?? "" },
-          update: { language: body.language ?? null, text: body.text ?? "" },
-        },
-      },
-    },
-    include: { lyrics: true },
-  });
-  return { data: upserted };
-};
-
 exports.tracksTrackIdGET = async function (trackId, include) {
+  console.log('[TracksService.tracksTrackIdGET] called with trackId=', trackId, 'include=', include);
   const track = await prisma.track.findUnique({
     where: { id: trackId },
     include: buildInclude(include),
@@ -209,219 +194,8 @@ exports.tracksTrackIdGET = async function (trackId, include) {
   return { data: track };
 };
 
-/**
- * Subir o actualizar archivo de audio
- *
- * trackId UUID
- * returns TrackResponse
- **/
-exports.tracksTrackIdAudioPOST = function (trackId) {
-  return new Promise(function (resolve, reject) {
-    var examples = {};
-    examples["application/json"] = {
-      data: {
-        createdAt: "2000-01-23T04:56:07.000+00:00",
-        trackNumber: 5,
-        stats: {
-          playCount: 7,
-        },
-        album: {
-          id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          title: "title",
-        },
-        id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-        audio: {
-          codec: "codec",
-          bitrate: 2,
-          url: "http://example.com/aeiou",
-        },
-        title: "title",
-        durationSec: 5,
-        lyrics: {
-          language: "language",
-          text: "text",
-        },
-        updatedAt: "2000-01-23T04:56:07.000+00:00",
-      },
-    };
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
-};
 
-/**
- * Listar comentarios de una pista
- *
- * trackId UUID
- * page Integer  (optional)
- * limit Integer  (optional)
- * returns PaginatedCommentList
- **/
-exports.tracksTrackIdCommentsGET = function (trackId, page, limit) {
-  return new Promise(function (resolve, reject) {
-    var examples = {};
-    examples["application/json"] = {
-      data: [
-        {
-          createdAt: "2000-01-23T04:56:07.000+00:00",
-          targetId: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          replies: [null, null],
-          rating: 1,
-          targetType: "album",
-          id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          text: "text",
-          userId: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          status: "visible",
-          likes: 6,
-          updatedAt: "2000-01-23T04:56:07.000+00:00",
-        },
-        {
-          createdAt: "2000-01-23T04:56:07.000+00:00",
-          targetId: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          replies: [null, null],
-          rating: 1,
-          targetType: "album",
-          id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          text: "text",
-          userId: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          status: "visible",
-          likes: 6,
-          updatedAt: "2000-01-23T04:56:07.000+00:00",
-        },
-      ],
-      meta: {
-        total: 123,
-        limit: 20,
-        page: 1,
-      },
-    };
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
-};
 
-/**
- * Comentar en una pista
- *
- * body CommentCreateInput
- * trackId UUID
- * returns CommentResponse
- **/
-exports.tracksTrackIdCommentsPOST = function (body, trackId) {
-  return new Promise(function (resolve, reject) {
-    var examples = {};
-    examples["application/json"] = {
-      data: {
-        createdAt: "2000-01-23T04:56:07.000+00:00",
-        targetId: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-        replies: [null, null],
-        rating: 1,
-        targetType: "album",
-        id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-        text: "text",
-        userId: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-        status: "visible",
-        likes: 6,
-        updatedAt: "2000-01-23T04:56:07.000+00:00",
-      },
-    };
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
-};
-
-/**
- * Eliminar pista
- *
- * trackId UUID
- * no response value expected for this operation
- **/
-exports.tracksTrackIdDELETE = function (trackId) {
-  return new Promise(function (resolve, reject) {
-    resolve();
-  });
-};
-
-/**
- * Detalle de pista
- *
- * trackId UUID
- * include List Campos relacionados a incluir, separados por coma. Ej. `tracks,label,stats` (optional)
- * returns TrackResponse
- **/
-exports.tracksTrackIdGET = async function (trackId, include) {
-  const track = await prisma.track.findUnique({
-    where: { id: trackId },
-    include: buildInclude(include),
-  });
-  if (!track) {
-    const err = new Error('Track not found');
-    err.status = 404;
-    throw err;
-  }
-  return { data: track };
-};
-
-/**
- * Añadir o actualizar letras
- *
- * body TrackId_lyrics_body
- * trackId UUID
- * returns TrackResponse
- **/
-exports.tracksTrackIdLyricsPOST = function (body, trackId) {
-  return new Promise(function (resolve, reject) {
-    var examples = {};
-    examples["application/json"] = {
-      data: {
-        createdAt: "2000-01-23T04:56:07.000+00:00",
-        trackNumber: 5,
-        stats: {
-          playCount: 7,
-        },
-        album: {
-          id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          title: "title",
-        },
-        id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-        audio: {
-          codec: "codec",
-          bitrate: 2,
-          url: "http://example.com/aeiou",
-        },
-        title: "title",
-        durationSec: 5,
-        lyrics: {
-          language: "language",
-          text: "text",
-        },
-        updatedAt: "2000-01-23T04:56:07.000+00:00",
-      },
-    };
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
-};
-
-/**
- * Actualizar parcialmente una pista
- *
- * body TrackUpdateInput
- * trackId UUID
- * returns TrackResponse
- **/
 exports.tracksTrackIdPATCH = async function (body, trackId) {
   try {
     const patch = {};
@@ -448,25 +222,172 @@ exports.tracksTrackIdPATCH = async function (body, trackId) {
 };
 
 /**
- * URL de streaming/preview (redirección 302 o URL firmada)
- *
- * trackId UUID
- * returns inline_response_200
- **/
-exports.tracksTrackIdStreamGET = function (trackId) {
-  return (async () => {
-    const t = await prisma.track.findUnique({ where: { id: trackId }, include: { audio: true } });
-    if (!t) {
-      const err = new Error('Track not found');
-      err.status = 404;
-      throw err;
-    }
-    if (!t.audio || !t.audio.url) {
-      const err = new Error('No audio available for this track');
-      err.status = 404;
-      throw err;
-    }
-    // Return JSON with the URL (client can fetch/redirect to it)
-    return { url: t.audio.url, expiresAt: null };
-  })();
+ * Eliminar pista
+ */
+exports.tracksTrackIdDELETE = async function (trackId) {
+  try {
+    await prisma.track.delete({ where: { id: trackId } });
+    return { data: { message: 'Track deleted' } };
+  } catch (err) {
+    const e = new Error(err.message || 'Failed to delete track');
+    e.status = err.code === 'P2025' ? 404 : 500;
+    throw e;
+  }
+};
+
+/**
+ * URL de streaming/preview
+ */
+exports.tracksTrackIdStreamGET = async function (trackId) {
+  const track = await prisma.track.findUnique({ 
+    where: { id: trackId }, 
+    include: { audio: true } 
+  });
+  if (!track) {
+    const err = new Error('Track not found');
+    err.status = 404;
+    throw err;
+  }
+  if (!track.audio || !track.audio.url) {
+    const err = new Error('No audio available for this track');
+    err.status = 404;
+    throw err;
+  }
+  return { url: track.audio.url, expiresAt: null };
+};
+
+/**
+ * URL de streaming/preview
+ */
+exports.tracksTrackIdStreamGET = async function (trackId) {
+  const track = await prisma.track.findUnique({ 
+    where: { id: trackId }, 
+    include: { audio: true } 
+  });
+  if (!track) {
+    const err = new Error('Track not found');
+    err.status = 404;
+    throw err;
+  }
+  if (!track.audio || !track.audio.url) {
+    const err = new Error('No audio available for this track');
+    err.status = 404;
+    throw err;
+  }
+  return { url: track.audio.url, expiresAt: null };
+};
+
+/**
+ * Subir o actualizar audio de una pista
+ */
+exports.tracksTrackIdAudioPOST = async function (trackId, body) {
+  if (!body || !body.url) {
+    const err = new Error('Audio URL is required');
+    err.status = 400;
+    throw err;
+  }
+
+  const track = await prisma.track.findUnique({ where: { id: trackId } });
+  if (!track) {
+    const err = new Error('Track not found');
+    err.status = 404;
+    throw err;
+  }
+
+  const upserted = await prisma.track.update({
+    where: { id: trackId },
+    data: {
+      audio: {
+        upsert: {
+          create: {
+            codec: body.codec ?? null,
+            bitrate: body.bitrate ?? null,
+            url: body.url,
+          },
+          update: {
+            codec: body.codec ?? null,
+            bitrate: body.bitrate ?? null,
+            url: body.url,
+          },
+        },
+      },
+    },
+    include: { audio: true },
+  });
+  return { data: upserted };
+};
+
+/**
+ * Añadir o actualizar letras
+ */
+exports.tracksTrackIdLyricsPOST = async function (body, trackId) {
+  const track = await prisma.track.findUnique({ where: { id: trackId } });
+  if (!track) {
+    const err = new Error(`Track with id ${trackId} not found`);
+    err.status = 404;
+    throw err;
+  }
+
+  const upserted = await prisma.track.update({
+    where: { id: trackId },
+    data: {
+      lyrics: {
+        upsert: {
+          create: { language: body.language ?? null, text: body.text ?? "" },
+          update: { language: body.language ?? null, text: body.text ?? "" },
+        },
+      },
+    },
+    include: { lyrics: true },
+  });
+  return { data: upserted };
+};
+
+/**
+ * Listar comentarios de una pista
+ */
+exports.tracksTrackIdCommentsGET = async function (trackId, page, limit) {
+  // TODO: Implementar cuando exista la tabla de comentarios
+  return { 
+    data: [],
+    meta: { total: 0, page: 1, limit: 20 }
+  };
+};
+
+/**
+ * Comentar en una pista
+ */
+exports.tracksTrackIdCommentsPOST = async function (body, trackId) {
+  // TODO: Implementar cuando exista la tabla de comentarios
+  const err = new Error('Comments not yet implemented');
+  err.status = 501;
+  throw err;
+};
+
+/**
+ * Obtener estadísticas de reproducción de una pista
+ */
+exports.tracksTrackIdStatsGET = async function (trackId) {
+  const track = await prisma.track.findUnique({
+    where: { id: trackId },
+    include: { stats: true }
+  });
+
+  if (!track) {
+    const err = new Error('Track not found');
+    err.status = 404;
+    throw err;
+  }
+
+  if (!track.stats) {
+    return { 
+      data: { 
+        id: null,
+        playCount: 0,
+        trackId: trackId
+      } 
+    };
+  }
+
+  return { data: track.stats };
 };

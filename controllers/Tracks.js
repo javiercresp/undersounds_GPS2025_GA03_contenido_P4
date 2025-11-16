@@ -65,7 +65,13 @@ module.exports.tracksTrackIdDELETE = function tracksTrackIdDELETE (req, res, nex
 };
 
 module.exports.tracksTrackIdGET = function tracksTrackIdGET (req, res, next, trackId, include) {
-  Tracks.tracksTrackIdGET(trackId, include)
+  // Safety: if swagger/oas3 mapping failed and `trackId` is undefined,
+  // try to read it from `req.params` (express path params). Also log
+  // incoming params to help debugging when requests provide unexpected values.
+  const resolvedTrackId = trackId || (req && req.params && req.params.trackId);
+  console.log('[tracksTrackIdGET] resolvedTrackId=', resolvedTrackId, 'trackIdArg=', trackId, 'req.params=', req && req.params, 'req.query=', req && req.query);
+
+  Tracks.tracksTrackIdGET(resolvedTrackId, include)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -96,4 +102,14 @@ module.exports.tracksTrackIdPATCH = function tracksTrackIdPATCH (req, res, next,
 
 module.exports.tracksTrackIdStreamGET = function tracksTrackIdStreamGET (req, res, next, trackId) {
   StreamingService.streamTrackAudio(trackId, req, res);
+};
+
+module.exports.tracksTrackIdStatsGET = function tracksTrackIdStatsGET (req, res, next, trackId) {
+  Tracks.tracksTrackIdStatsGET(trackId)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };

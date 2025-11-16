@@ -12,23 +12,43 @@ const prisma = require('../src/db/prisma');
  * - Streaming completo (Content-Length, Cache headers)
  * - Partial content / Range requests (para seek/scrubbing)
  * - Múltiples formatos (MP3, WAV, OGG, M4A, FLAC, WebM)
+ * 
+ * IMPORTANTE: Se actualiza el playCount al inicio, independientemente de si el archivo existe
  */
 exports.streamTrackAudio = async (trackId, req, res) => {
   try {
     // 1. Buscar track y audio en BD
     const track = await prisma.track.findUnique({
       where: { id: trackId },
-      include: { audio: true }
+      include: { audio: true, stats: true }
     });
 
     if (!track) {
+      console.warn(`[STREAM] Track not found: ${trackId}`);
       res.status(404).json({ error: 'Track not found' });
       return;
     }
 
     if (!track.audio || !track.audio.url) {
+      console.warn(`[STREAM] No audio available for track: ${trackId}`);
       res.status(404).json({ error: 'No audio available for this track' });
       return;
+    }
+
+    // 1.5. *** ACTUALIZAR ESTADÍSTICAS DE REPRODUCCIÓN PRIMERO ***
+    // Esto se debe hacer ANTES de validar el archivo, para asegurar que siempre se registre
+    try {
+      // Use an atomic upsert with increment to avoid race conditions
+      // Prisma supports increment operator which is safe for concurrent requests.
+      const upserted = await prisma.trackStats.upsert({
+        where: { trackId: trackId },
+        update: { playCount: { increment: 1 } },
+        create: { trackId: trackId, playCount: 1 }
+      });
+      console.log(`[STREAM] TrackStats upsert for ${trackId}: playCount=${upserted.playCount}`);
+    } catch (statsErr) {
+      console.error(`[STREAM] Error upserting stats for track ${trackId}:`, statsErr && statsErr.message ? statsErr.message : statsErr);
+      // continue even if stats update fails
     }
 
     // 2. Resolver ruta del archivo

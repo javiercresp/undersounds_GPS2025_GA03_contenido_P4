@@ -788,6 +788,35 @@ paths:
                 type: string
                 format: uri
       x-swagger-router-controller: Tracks
+  /tracks/{trackId}/stats:
+    get:
+      tags:
+      - Tracks
+      summary: Obtener estadísticas de reproducción de una pista
+      operationId: tracksTrackIdStatsGET
+      parameters:
+      - name: trackId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: Estadísticas de reproducción
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackStatsResponse"
+        "404":
+          description: Pista no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      x-swagger-router-controller: Tracks
   /tracks/{trackId}/lyrics:
     post:
       tags:
@@ -2762,6 +2791,27 @@ components:
             language: language
             text: text
           updatedAt: 2000-01-23T04:56:07.000+00:00
+    TrackStatsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              nullable: true
+            playCount:
+              type: integer
+              description: Número de veces que se ha reproducido la canción
+            trackId:
+              type: string
+              format: uuid
+      example:
+        data:
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          playCount: 42
+          trackId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
     MerchItem:
       type: object
       properties:
