@@ -2,6 +2,7 @@
 
 var utils = require('../utils/writer.js');
 var Tracks = require('../service/TracksService');
+var StreamingService = require('../service/StreamingService');
 
 module.exports.tracksGET = function tracksGET (req, res, next, page, limit, include, albumId, artistId, labelId, genre, tag, language, minDurationSec, maxDurationSec, releasedFrom, releasedTo, sort, order, q) {
   Tracks.tracksGET(page, limit, include, albumId, artistId, labelId, genre, tag, language, minDurationSec, maxDurationSec, releasedFrom, releasedTo, sort, order, q)
@@ -63,14 +64,20 @@ module.exports.tracksTrackIdDELETE = function tracksTrackIdDELETE (req, res, nex
     });
 };
 
-module.exports.tracksTrackIdGET = function tracksTrackIdGET (req, res, next, trackId, include) {
-  Tracks.tracksTrackIdGET(trackId, include)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
+module.exports.tracksTrackIdGET = function tracksTrackIdGET (
+  req,
+  res,
+  next,
+  trackId,
+  include
+) {
+  const id = req?.openapi?.pathParams?.trackId || trackId;
+
+  Tracks.tracksTrackIdGET(id, include)
+    .then((response) => utils.writeJson(res, response))
+    .catch((e) =>
+      utils.writeJson(res, { message: e.message }, e.status || 500)
+    );
 };
 
 module.exports.tracksTrackIdLyricsPOST = function tracksTrackIdLyricsPOST (req, res, next, body, trackId) {
@@ -94,7 +101,11 @@ module.exports.tracksTrackIdPATCH = function tracksTrackIdPATCH (req, res, next,
 };
 
 module.exports.tracksTrackIdStreamGET = function tracksTrackIdStreamGET (req, res, next, trackId) {
-  Tracks.tracksTrackIdStreamGET(trackId)
+  StreamingService.streamTrackAudio(trackId, req, res);
+};
+
+module.exports.tracksTrackIdStatsGET = function tracksTrackIdStatsGET (req, res, next, trackId) {
+  Tracks.tracksTrackIdStatsGET(trackId)
     .then(function (response) {
       utils.writeJson(res, response);
     })

@@ -1,211 +1,120 @@
-'use strict';
+"use strict";
 
+const path = require('path');
+const prisma = require('../src/db/prisma');
+
+function fileUrlFor(subfolder, filename) {
+  // served at /uploads/<subfolder>/<filename>
+  return `/uploads/${subfolder}/${filename}`;
+}
 
 /**
  * Subir o actualizar portada del álbum
- *
- * albumId UUID 
- * returns AlbumResponse
- **/
-exports.albumsAlbumIdCoverPOST = function(albumId) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = {
-  "data" : {
-    "artist" : {
-      "name" : "name",
-      "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
-    },
-    "releaseDate" : "2000-01-23",
-    "description" : "description",
-    "label" : {
-      "name" : "name",
-      "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
-    },
-    "title" : "title",
-    "tracks" : [ {
-      "createdAt" : "2000-01-23T04:56:07.000+00:00",
-      "trackNumber" : 5,
-      "stats" : {
-        "playCount" : 7
-      },
-      "album" : {
-        "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-        "title" : "title"
-      },
-      "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-      "audio" : {
-        "codec" : "codec",
-        "bitrate" : 2,
-        "url" : "http://example.com/aeiou"
-      },
-      "title" : "title",
-      "durationSec" : 5,
-      "lyrics" : {
-        "language" : "language",
-        "text" : "text"
-      },
-      "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-    }, {
-      "createdAt" : "2000-01-23T04:56:07.000+00:00",
-      "trackNumber" : 5,
-      "stats" : {
-        "playCount" : 7
-      },
-      "album" : {
-        "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-        "title" : "title"
-      },
-      "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-      "audio" : {
-        "codec" : "codec",
-        "bitrate" : 2,
-        "url" : "http://example.com/aeiou"
-      },
-      "title" : "title",
-      "durationSec" : 5,
-      "lyrics" : {
-        "language" : "language",
-        "text" : "text"
-      },
-      "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-    } ],
-    "tags" : [ "tags", "tags" ],
-    "cover" : {
-      "alt" : "alt",
-      "width" : 6,
-      "url" : "http://example.com/aeiou",
-      "height" : 1
-    },
-    "createdAt" : "2000-01-23T04:56:07.000+00:00",
-    "stats" : {
-      "playCount" : 9,
-      "likeCount" : 3,
-      "ratingAvg" : 4.5,
-      "commentCount" : 2
-    },
-    "price" : 0.8008282,
-    "genres" : [ "genres", "genres" ],
-    "currency" : "EUR",
-    "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-    "releaseState" : "draft",
-    "updatedAt" : "2000-01-23T04:56:07.000+00:00"
+ */
+exports.albumsAlbumIdCoverPOST = async function (albumId, file) {
+  if (!file) {
+    const err = new Error('No file uploaded');
+    err.status = 400;
+    throw err;
   }
-};
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
+
+  const url = fileUrlFor('covers', file.filename);
+
+  const createdImage = await prisma.image.create({
+    data: {
+      url,
+      alt: file.originalname || null,
+      width: 0,
+      height: 0,
+    },
   });
-}
+
+  const updated = await prisma.album.update({
+    where: { id: albumId },
+    data: { coverId: createdImage.id },
+    include: { cover: true, tracks: true, label: true, stats: true, artist: true },
+  });
+
+  return { data: updated };
+};
 
 
 /**
- * Subir imágenes del producto
- *
- * merchId UUID 
- * returns MerchResponse
- **/
-exports.merchMerchIdImagesPOST = function(merchId) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = {
-  "data" : {
-    "createdAt" : "2000-01-23T04:56:07.000+00:00",
-    "images" : [ {
-      "alt" : "alt",
-      "width" : 6,
-      "url" : "http://example.com/aeiou",
-      "height" : 1
-    }, {
-      "alt" : "alt",
-      "width" : 6,
-      "url" : "http://example.com/aeiou",
-      "height" : 1
-    } ],
-    "artist" : {
-      "name" : "name",
-      "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
-    },
-    "name" : "name",
-    "description" : "description",
-    "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-    "variants" : [ {
-      "color" : "color",
-      "size" : "size",
-      "price" : 0.8008282,
-      "currency" : "EUR",
-      "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-      "sku" : "sku",
-      "stock" : 6
-    }, {
-      "color" : "color",
-      "size" : "size",
-      "price" : 0.8008282,
-      "currency" : "EUR",
-      "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-      "sku" : "sku",
-      "stock" : 6
-    } ],
-    "label" : {
-      "name" : "name",
-      "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
-    },
-    "availability" : "in_stock",
-    "type" : "camiseta",
-    "updatedAt" : "2000-01-23T04:56:07.000+00:00"
+ * Subir imágenes del producto (merch)
+ */
+exports.merchMerchIdImagesPOST = async function (merchId, files) {
+  if (!files || !files.length) {
+    const err = new Error('No files uploaded');
+    err.status = 400;
+    throw err;
   }
+
+  // create image records for each file
+  const created = [];
+  for (const f of files) {
+    const url = fileUrlFor('merch', f.filename);
+    const img = await prisma.image.create({ data: { url, alt: f.originalname || null, width: 0, height: 0 } });
+    created.push(img);
+  }
+
+  // If merch has no cover yet, set the first image as cover
+  const merch = await prisma.merchItem.findUnique({ where: { id: merchId }, select: { id: true, coverId: true } });
+  if (!merch) {
+    const err = new Error('Merch item not found');
+    err.status = 404;
+    throw err;
+  }
+  if (!merch.coverId) {
+    await prisma.merchItem.update({ where: { id: merchId }, data: { coverId: created[0].id } });
+  }
+
+  // return merch with cover
+  const out = await prisma.merchItem.findUnique({ where: { id: merchId }, include: { cover: true } });
+  return { data: out };
 };
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
-}
 
 
 /**
- * Subir o actualizar archivo de audio
- *
- * trackId UUID 
- * returns TrackResponse
- **/
-exports.tracksTrackIdAudioPOST = function(trackId) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = {
-  "data" : {
-    "createdAt" : "2000-01-23T04:56:07.000+00:00",
-    "trackNumber" : 5,
-    "stats" : {
-      "playCount" : 7
-    },
-    "album" : {
-      "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-      "title" : "title"
-    },
-    "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-    "audio" : {
-      "codec" : "codec",
-      "bitrate" : 2,
-      "url" : "http://example.com/aeiou"
-    },
-    "title" : "title",
-    "durationSec" : 5,
-    "lyrics" : {
-      "language" : "language",
-      "text" : "text"
-    },
-    "updatedAt" : "2000-01-23T04:56:07.000+00:00"
+ * Subir o actualizar archivo de audio para una pista
+ */
+exports.tracksTrackIdAudioPOST = async function (trackId, file) {
+  if (!file) {
+    const err = new Error('No file uploaded');
+    err.status = 400;
+    throw err;
   }
-};
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
+
+  const track = await prisma.track.findUnique({ where: { id: trackId } });
+  if (!track) {
+    const err = new Error('Track not found');
+    err.status = 404;
+    throw err;
+  }
+
+  const url = fileUrlFor('audio', file.filename);
+
+  // crude codec detection from mimetype
+  const mime = (file.mimetype || '').split('/')[1] || null;
+  const codec = mime ? mime.split('+')[0] : null;
+
+  // bitrate unknown here — set 0 as placeholder
+  const bitrate = 0;
+
+  // upsert audio record for this track
+  const updated = await prisma.track.update({
+    where: { id: trackId },
+    data: {
+      audio: {
+        upsert: {
+          create: { codec: codec, bitrate: bitrate, url },
+          update: { codec: codec, bitrate: bitrate, url },
+        },
+      },
+    },
+    include: { album: true, audio: true, lyrics: true, stats: true },
   });
-}
+
+  return { data: updated };
+};
+
 
