@@ -64,20 +64,20 @@ module.exports.tracksTrackIdDELETE = function tracksTrackIdDELETE (req, res, nex
     });
 };
 
-module.exports.tracksTrackIdGET = function tracksTrackIdGET (req, res, next, trackId, include) {
-  // Safety: if swagger/oas3 mapping failed and `trackId` is undefined,
-  // try to read it from `req.params` (express path params). Also log
-  // incoming params to help debugging when requests provide unexpected values.
-  const resolvedTrackId = trackId || (req && req.params && req.params.trackId);
-  console.log('[tracksTrackIdGET] resolvedTrackId=', resolvedTrackId, 'trackIdArg=', trackId, 'req.params=', req && req.params, 'req.query=', req && req.query);
+module.exports.tracksTrackIdGET = function tracksTrackIdGET (
+  req,
+  res,
+  next,
+  trackId,
+  include
+) {
+  const id = req?.openapi?.pathParams?.trackId || trackId;
 
-  Tracks.tracksTrackIdGET(resolvedTrackId, include)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
+  Tracks.tracksTrackIdGET(id, include)
+    .then((response) => utils.writeJson(res, response))
+    .catch((e) =>
+      utils.writeJson(res, { message: e.message }, e.status || 500)
+    );
 };
 
 module.exports.tracksTrackIdLyricsPOST = function tracksTrackIdLyricsPOST (req, res, next, body, trackId) {

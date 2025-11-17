@@ -181,16 +181,22 @@ exports.tracksPOST = async function (body) {
 };
 
 exports.tracksTrackIdGET = async function (trackId, include) {
-  console.log('[TracksService.tracksTrackIdGET] called with trackId=', trackId, 'include=', include);
+  const includeOptions = buildInclude(include) || {};
+
+  // Asegura que siempre traigamos las estadísticas para exponer el playCount
+  includeOptions.stats = true;
+
   const track = await prisma.track.findUnique({
     where: { id: trackId },
-    include: buildInclude(include),
+    include: includeOptions,
   });
+
   if (!track) {
     const err = new Error("Track not found");
     err.status = 404;
     throw err;
   }
+
   return { data: track };
 };
 
