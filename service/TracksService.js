@@ -50,7 +50,18 @@ const buildInclude = (includeCsv) => {
   return include;
 };
 
-const like = (q) => ({ contains: q, mode: "insensitive" });
+// SQLite doesn't support mode: "insensitive" - removed for compatibility
+const like = (q) => ({ contains: q });
+
+// Helpers de normalización para tolerar acentos y puntuación
+const stripDiacritics = (s) => {
+  try {
+    return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  } catch {
+    return s;
+  }
+};
+const stripPunctuation = (s) => s.replace(/[\.&'’_/]+/g, ' ');
 
 exports.tracksGET = async function (
   page,
@@ -70,62 +81,122 @@ exports.tracksGET = async function (
   order,
   q
 ) {
-  const pageNum = toInt(page, 1);
-  const pageSize = toInt(limit, 20);
-  const skip = (pageNum - 1) * pageSize;
+  try {
+    const pageNum = toInt(page, 1);
+    const pageSize = toInt(limit, 20);
+    const skip = (pageNum - 1) * pageSize;
 
-  // Filtrado
+    // Filtrado
+    const trackFilters = {};
+    if (q) {
+      trackFilters.title = { contains: String(q) };
+    }
 
-  const trackFilters = {};
-  if (q) {
-    trackFilters.title = { contains: q };
+    const min = Number(minDurationSec);
+    const max = Number(maxDurationSec);
+    const durationFilter = {};
+    if (!isNaN(min)) durationFilter.gte = min;
+    if (!isNaN(max)) durationFilter.lte = max;
+    if (Object.keys(durationFilter).length > 0) {
+      trackFilters.durationSec = durationFilter;
+    }
+
+    const albumFilters = {};
+    if (genre && String(genre).trim()) {
+      // Normaliza variantes comunes (espacios vs guiones) y tolera mayúsculas/minúsculas
+      const gRaw = String(genre).trim();
+      const gClean = stripPunctuation(stripDiacritics(gRaw));
+
+      const sepVariants = (s) => [
+        s,
+        s.replace(/\s+/g, ' ').trim(),
+        s.replace(/\s+/g, '-'),
+        s.replace(/-/g, ' '),
+        s.replace(/[\s-]+/g, ''), // variante "fusionada": hip hop -> hiphop
+      ];
+
+      const toTitleCase = (s) => s
+        .split(/([\s-]+)/) // conserva separadores (espacios o guiones)
+        .map((part) => (/^[\s-]+$/.test(part) ? part : (part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())))
+        .join('');
+
+      const base = [
+        ...sepVariants(gRaw),
+        ...sepVariants(gClean),
+      ];
+      const withCase = base.flatMap((v) => [
+        v,
+        v.toLowerCase(),
+        v.toUpperCase(),
+        toTitleCase(v),
+      ]);
+
+      const variants = Array.from(new Set(withCase)).filter(Boolean);
+
+      if (variants.length === 1) {
+        albumFilters.genres = { contains: variants[0] };
+      } else {
+        albumFilters.OR = variants.map((v) => ({ genres: { contains: v } }));
+      }
+    }
+    if (releasedFrom || releasedTo) {
+      albumFilters.releaseDate = {};
+      if (releasedFrom) albumFilters.releaseDate.gte = new Date(releasedFrom);
+      if (releasedTo) albumFilters.releaseDate.lte = new Date(releasedTo);
+    }
+
+    const albumWhere = Object.keys(albumFilters).length ? { ...albumFilters } : null;
+
+    // Prisma relation filter for 1:1 uses `is`/`isNot`.
+    const where = {
+      ...trackFilters,
+      ...(albumWhere ? { album: { is: albumWhere } } : {}),
+    };
+
+    // Ordenación
+    const validSortFields = ["durationSec", "title", "createdAt"];
+    const validOrder = ["asc", "desc"];
+    const sortField = validSortFields.includes(sort) ? sort : "createdAt";
+    const sortOrder = validOrder.includes(order) ? order : "desc";
+
+    // Debug opcional
+    if (process.env.DEBUG_CONTENT === '1') {
+      console.log('[tracksGET] where=', JSON.stringify(where));
+      console.log('[tracksGET] include=', JSON.stringify(buildInclude(include)));
+    }
+
+    const [rows, total] = await Promise.all([
+      prisma.track.findMany({
+        where,
+        include: buildInclude(include),
+        orderBy: { [sortField]: sortOrder },
+        skip,
+        take: pageSize,
+      }),
+      prisma.track.count({ where }),
+    ]);
+
+    // Add derived field `genre` from album.genres (CSV -> first token)
+    const normalized = Array.isArray(rows)
+      ? rows.map((r) => {
+          const csv = typeof r?.album?.genres === 'string' ? r.album.genres : '';
+          const first = csv
+            ? csv
+                .split(',')
+                .map((s) => s.trim())
+                .filter(Boolean)[0] || null
+            : null;
+          return { ...r, genre: first };
+        })
+      : rows;
+
+    return { data: normalized, meta: { total, page: pageNum, limit: pageSize } };
+  } catch (err) {
+    console.error('[tracksGET] error:', err?.message || err);
+    const e = new Error(err?.message || 'Internal Server Error');
+    e.status = 500;
+    throw e;
   }
-
-  const min = Number(minDurationSec);
-  const max = Number(maxDurationSec);
-
-  const durationFilter = {};
-  if (!isNaN(min)) durationFilter.gte = min;
-  if (!isNaN(max)) durationFilter.lte = max;
-
-  if (Object.keys(durationFilter).length > 0) {
-    trackFilters.durationSec = durationFilter;
-  }
-
-  const albumFilters = {};
-  if (genre) albumFilters.genres = { contains: genre, mode: "insensitive" };
-  if (releasedFrom || releasedTo) {
-    albumFilters.releaseDate = {};
-    if (releasedFrom) albumFilters.releaseDate.gte = new Date(releasedFrom);
-    if (releasedTo) albumFilters.releaseDate.lte = new Date(releasedTo);
-  }
-
-  let albumWhere = Object.keys(albumFilters).length ? { ...albumFilters } : {};
-
-  const where = {
-    ...trackFilters,
-    ...(Object.keys(albumWhere).length ? { album: albumWhere } : {}),
-  };
-
-  // Ordenación
-  const validSortFields = ["durationSec", "title", "createdAt"];
-  const validOrder = ["asc", "desc"];
-
-  const sortField = validSortFields.includes(sort) ? sort : "createdAt";
-  const sortOrder = validOrder.includes(order) ? order : "desc";
-
-  const [rows, total] = await Promise.all([
-    prisma.track.findMany({
-      where,
-      include: buildInclude(include),
-      orderBy: { [sortField]: sortOrder },
-      skip,
-      take: pageSize,
-    }),
-    prisma.track.count({ where }),
-  ]);
-
-  return { data: rows, meta: { total, page: pageNum, limit: pageSize } };
 };
 
 exports.tracksPOST = async function (body) {
