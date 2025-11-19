@@ -13,16 +13,14 @@ model Album {
   id           String      @id @default(uuid())
   title        String
   description  String?
-  artist       Artist      @relation(fields: [artistId], references: [id])
-  artistId     String
-  label        Label       @relation(fields: [labelId], references: [id])
-  labelId      String
-  releaseDate  DateTime
+  artistId     String?     // ID del usuario autenticado (puede ser número o UUID) - REFERENCIA A USUARIOS BD
+  labelId      String?     // ID del label (puede ser número o UUID)
+  releaseDate  DateTime?
   releaseState String // draft, scheduled, published, archived
-  price        Float
-  currency     String
-  genres       String // Cambiado de String[] a String
-  tags         String // Cambiado de String[] a String
+  price        Float?
+  currency     String?
+  genres       String? // CSV de géneros
+  tags         String? // CSV de tags
   cover        Image       @relation(fields: [coverId], references: [id])
   coverId      String      @unique // Relación uno a uno, clave única
   tracks       Track[]
@@ -61,14 +59,12 @@ model Track {
 model Artist {
   id     String      @id @default(uuid())
   name   String
-  albums Album[] // Relación inversa
   merch  MerchItem[] @relation("ArtistMerch")
 }
 
 model Label {
   id     String      @id @default(uuid())
   name   String      @unique
-  albums Album[] // Relación inversa
   merch  MerchItem[] @relation("LabelMerch")
 }
 
