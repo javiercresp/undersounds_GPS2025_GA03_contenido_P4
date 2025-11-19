@@ -12,8 +12,11 @@ const serverPort = parseInt(process.env.PORT, 10) || 8081;
 const options = {
   routing: { controllers: path.join(__dirname, './controllers') },
   middleware: {
-    swaggerTools: false,  // Desactiva validación automática de swagger si causa conflictos
+    swaggerTools: false,  // Desactiva validación automática de swagger
+    swaggerValidator: false,  // Desactiva validador de request
+    swaggerSecurity: false,   // Desactiva seguridad
   },
+  strict: false,  // No ser estricto con la validación
 };
 
 // Crea la app generada por oas3-tools (sub-app)
@@ -49,6 +52,14 @@ app.use((req, res, next) => {
 // Body parsers — importante el orden para multipart
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Middleware de logging para debug
+app.use((req, res, next) => {
+  if (req.method === 'POST' || req.method === 'PATCH') {
+    console.log(`[${req.method}] ${req.path}`, 'body:', JSON.stringify(req.body, null, 2));
+  }
+  next();
+});
 
 // Middleware para rutas de upload — ANTES de oas3-tools para evitar validación
 const multer = require('multer');

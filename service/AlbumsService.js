@@ -29,7 +29,7 @@ const buildInclude = (includeCsv) => {
     .map((s) => s.trim())
     .filter(Boolean);
   const include = {};
-  const allowed = ["tracks", "label", "stats", "artist", "cover"];
+  const allowed = ["tracks", "label", "stats", "cover"];
   for (const p of parts) if (allowed.includes(p)) include[p] = true;
   return Object.keys(include).length ? include : undefined;
 };
@@ -92,7 +92,6 @@ exports.albumsAlbumIdCoverPOST = async function (albumId /*, body */) {
       tracks: true,
       label: true,
       stats: true,
-      artist: true,
     },
   });
 
@@ -162,7 +161,6 @@ exports.albumsAlbumIdPATCH = async function (body, albumId) {
       tracks: true,
       label: true,
       stats: true,
-      artist: true,
       cover: true,
     },
   });
@@ -191,8 +189,9 @@ exports.albumsPOST = async function (body) {
     if (!title) return { data: { message: "title is required" }, status: 400 };
     if (!artistId)
       return { data: { message: "artistId is required" }, status: 400 };
-    if (!labelId)
-      return { data: { message: "labelId is required" }, status: 400 };
+
+    // Convierte artistId a string
+    const artistIdStr = String(artistId).trim();
 
     // Ajusta a tu esquema de BD:
     // Si en Prisma genres/tags son String CSV:
@@ -210,9 +209,13 @@ exports.albumsPOST = async function (body) {
       releaseState: "draft",
       genres: genresStr, // si usas arrays en BD, guarda 'genres' directamente
       tags: tagsStr, // idem
-      artist: { connect: { id: artistId } },
-      label: { connect: { id: labelId } },
+      artistId: artistIdStr, // Almacenar directamente como string, sin conexión forzada
     };
+
+    // Label es opcional
+    if (labelId) {
+      data.labelId = String(labelId).trim();
+    }
 
     // Portada: si tu relación cover es obligatoria, crea una mínima.
     // Si no lo es, comenta esto.
@@ -240,7 +243,6 @@ exports.albumsAlbumIdTracksPOST = async function (body, albumId) {
           tracks: true,
           label: true,
           stats: true,
-          artist: true,
           cover: true,
         },
       });
@@ -280,7 +282,6 @@ exports.albumsAlbumIdTracksPOST = async function (body, albumId) {
           tracks: true,
           label: true,
           stats: true,
-          artist: true,
           cover: true,
         },
       });
@@ -312,7 +313,6 @@ exports.albumsAlbumIdTracksPOST = async function (body, albumId) {
         tracks: true,
         label: true,
         stats: true,
-        artist: true,
         cover: true,
       },
     });
