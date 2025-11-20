@@ -957,7 +957,6 @@ paths:
         explode: true
         schema:
           type: string
-          format: uuid
       - name: labelId
         in: query
         required: false
@@ -965,7 +964,6 @@ paths:
         explode: true
         schema:
           type: string
-          format: uuid
       - name: type
         in: query
         description: Tipo de producto
@@ -1614,7 +1612,6 @@ paths:
         explode: false
         schema:
           type: string
-          format: uuid
       responses:
         "204":
           description: Eliminado
@@ -2327,10 +2324,8 @@ components:
           type: string
         artistId:
           type: string
-          format: uuid
         labelId:
           type: string
-          format: uuid
         releaseDate:
           type: string
           format: date
@@ -2678,7 +2673,6 @@ components:
           type: integer
         artistId:
           type: string
-          format: uuid
     TrackCreateInput:
       allOf:
       - $ref: "#/components/schemas/TrackCreateMinimal"
@@ -2977,10 +2971,8 @@ components:
           - otro
         artistId:
           type: string
-          format: uuid
         labelId:
           type: string
-          format: uuid
     MerchUpdateInput:
       type: object
       properties:
@@ -2999,10 +2991,8 @@ components:
           - otro
         artistId:
           type: string
-          format: uuid
         labelId:
           type: string
-          format: uuid
         availability:
           type: string
           enum:
@@ -4109,7 +4099,6 @@ components:
           type: array
           items:
             type: string
-            format: uuid
     comments_commentId_body:
       type: object
       properties:

@@ -37,7 +37,6 @@ exports.merchGET = async function (
     } catch (e) {
       prisma = new PrismaClient();
     }
-
     const toInt = (v, def) => {
       const n = parseInt(v, 10);
       return Number.isFinite(n) && n > 0 ? n : def;
@@ -89,7 +88,7 @@ exports.merchGET = async function (
     const sortMap = {
       price: "priceCents",
       name: "title",
-    }
+    };
 
     const sortField = sortMap[sort] || sort || "createdAt";
     const sortOrder =
@@ -516,7 +515,9 @@ exports.merchPOST = async function (body) {
       prisma = new PrismaClient();
     }
 
+    console.log(body);
     const {
+      id,
       name,
       description = null,
       type = "otro",
@@ -560,6 +561,7 @@ exports.merchPOST = async function (body) {
     };
 
     const data = {
+      id,
       title: name,
       description,
       category: mapType(type),
@@ -570,9 +572,22 @@ exports.merchPOST = async function (body) {
       active: !!active,
     };
 
-    if (artistId) data.artist = { connect: { id: artistId } };
-    if (labelId) data.label = { connect: { id: labelId } };
-
+    if (artistId) {
+      await prisma.artist.upsert({
+        where: { id: artistId },
+        update: {},
+        create: { id: artistId, name: "artista_" + artistId },
+      });
+      data.artist = { connect: { id: artistId } };
+    }
+    if (labelId) {
+      await prisma.label.upsert({
+        where: { id: labelId },
+        update: {},
+        create: { id: labelId, name: "label_" + labelId },
+      });
+      data.label = { connect: { id: labelId } };
+    }
     if (cover) {
       data.cover = {
         create: {
@@ -591,6 +606,7 @@ exports.merchPOST = async function (body) {
     return { data: created, status: 201 };
   } catch (err) {
     console.error("[merchPOST] error", err?.code || err?.message || err);
+    console.error(err);
     return { data: { message: "Internal Server Error" }, status: 500 };
   }
 };

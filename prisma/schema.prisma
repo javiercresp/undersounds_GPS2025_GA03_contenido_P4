@@ -139,7 +139,7 @@ model MerchItem {
   currency   String @default("EUR")
 
   stock  Int     @default(0)
-  sku    String? @unique
+  sku    String?
   active Boolean @default(true)
 
   // Relaciones (opcionales) — NOMBRADAS para evitar choques con otras
