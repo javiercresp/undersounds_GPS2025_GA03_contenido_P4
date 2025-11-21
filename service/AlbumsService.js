@@ -29,7 +29,7 @@ const buildInclude = (includeCsv) => {
     .map((s) => s.trim())
     .filter(Boolean);
   const include = {};
-  const allowed = ["tracks", "label", "stats", "cover"];
+  const allowed = ["tracks", "stats", "cover"];
   for (const p of parts) if (allowed.includes(p)) include[p] = true;
   return Object.keys(include).length ? include : undefined;
 };
@@ -90,7 +90,6 @@ exports.albumsAlbumIdCoverPOST = async function (albumId /*, body */) {
     include: {
       cover: true,
       tracks: true,
-      label: true,
       stats: true,
     },
   });
@@ -154,18 +153,23 @@ exports.albumsAlbumIdPATCH = async function (body, albumId) {
 
   Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
 
-  const updated = await prisma.album.update({
-    where: { id: albumId },
-    data: patch,
-    include: {
-      tracks: true,
-      label: true,
-      stats: true,
-      cover: true,
-    },
-  });
+  try {
+    const updated = await prisma.album.update({
+      where: { id: albumId },
+      data: patch,
+      include: {
+        tracks: true,
+        stats: true,
+        cover: true,
+      },
+    });
 
-  return { data: updated };
+    return { data: updated };
+  } catch (err) {
+    console.error('[albumsAlbumIdPATCH] error for albumId=', albumId, err?.code || '', err?.meta || '', err?.message || err);
+    // Return a structured error payload so the controller can respond with useful info
+    return { data: { message: 'Failed to update album', error: err?.message || String(err) }, status: 500 };
+  }
 };
 
 // ----------------- POST ÁLBUM -----------------
@@ -241,7 +245,6 @@ exports.albumsAlbumIdTracksPOST = async function (body, albumId) {
         where: { id: albumId },
         include: {
           tracks: true,
-          label: true,
           stats: true,
           cover: true,
         },
@@ -280,7 +283,6 @@ exports.albumsAlbumIdTracksPOST = async function (body, albumId) {
         where: { id: albumId },
         include: {
           tracks: true,
-          label: true,
           stats: true,
           cover: true,
         },
@@ -311,7 +313,6 @@ exports.albumsAlbumIdTracksPOST = async function (body, albumId) {
       where: { id: albumId },
       include: {
         tracks: true,
-        label: true,
         stats: true,
         cover: true,
       },
