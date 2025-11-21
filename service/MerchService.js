@@ -98,7 +98,6 @@ exports.merchGET = async function (
     const [rows, total] = await Promise.all([
       prisma.merchItem.findMany({
         where,
-        include: { artist: true, label: true, cover: true },
         orderBy: { [sortField]: sortOrder },
         skip,
         take: pageSize,
@@ -251,7 +250,6 @@ exports.merchMerchIdGET = async function (merchId) {
 
   const merch = await prisma.merchItem.findUnique({
     where: { id: merchId },
-    include: { artist: true, label: true, cover: true },
   });
   if (!merch) {
     const err = new Error("Merch not found");
@@ -287,7 +285,6 @@ exports.merchMerchIdImagesPOST = async function (merchId) {
   const updated = await prisma.merchItem.update({
     where: { id: merchId },
     data: { coverId: createdImage.id },
-    include: { artist: true, label: true, cover: true },
   });
   return { data: updated };
 };
@@ -356,28 +353,18 @@ exports.merchMerchIdPATCH = async function (body, merchId) {
   if (Object.prototype.hasOwnProperty.call(body ?? {}, "active"))
     patch.active = !!body.active;
 
-  // Relaciones: artist/label
-  if (body?.artistId) patch.artist = { connect: { id: body.artistId } };
-  if (body?.labelId) patch.label = { connect: { id: body.labelId } };
-
-  // Cover: si se envía objeto 'cover' creamos imagen mínima
-  if (body?.cover) {
-    patch.cover = {
-      create: {
-        url: body.cover.url ?? "",
-        alt: body.cover.alt ?? "merch",
-        width: body.cover.width ?? null,
-        height: body.cover.height ?? null,
-      },
-    };
-  }
+  // IDs de referencia (sin relaciones FK)
+  if (body?.artistId) patch.artistId = body.artistId;
+  if (body?.labelId) patch.labelId = body.labelId;
+  
+  // Cover: si se envía coverId lo asignamos directamente (sin FK)
+  if (body?.coverId) patch.coverId = body.coverId;
 
   Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
 
   const updated = await prisma.merchItem.update({
     where: { id: merchId },
     data: patch,
-    include: { artist: true, label: true, cover: true },
   });
   return { data: updated };
 };
@@ -570,23 +557,15 @@ exports.merchPOST = async function (body) {
       active: !!active,
     };
 
-    if (artistId) data.artist = { connect: { id: artistId } };
-    if (labelId) data.label = { connect: { id: labelId } };
-
-    if (cover) {
-      data.cover = {
-        create: {
-          url: cover.url ?? "",
-          alt: cover.alt ?? "merch",
-          width: cover.width ?? null,
-          height: cover.height ?? null,
-        },
-      };
-    }
+    // Asignar IDs directamente sin relaciones FK (igual que en Album)
+    if (artistId) data.artistId = artistId;
+    if (labelId) data.labelId = labelId;
+    
+    // Cover: si se envía coverId lo asignamos (sin FK, es solo un string)
+    if (cover?.id) data.coverId = cover.id;
 
     const created = await prisma.merchItem.create({
       data,
-      include: { artist: true, label: true, cover: true },
     });
     return { data: created, status: 201 };
   } catch (err) {

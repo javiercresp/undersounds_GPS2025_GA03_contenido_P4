@@ -957,7 +957,7 @@ paths:
         explode: true
         schema:
           type: string
-          format: uuid
+          description: ID del artista (puede ser número o UUID)
       - name: labelId
         in: query
         required: false
@@ -965,7 +965,7 @@ paths:
         explode: true
         schema:
           type: string
-          format: uuid
+          description: ID del label (puede ser número o UUID)
       - name: type
         in: query
         description: Tipo de producto
@@ -2977,10 +2977,10 @@ components:
           - otro
         artistId:
           type: string
-          format: uuid
+          description: ID del artista (usuario autenticado) - puede ser número o UUID
         labelId:
           type: string
-          format: uuid
+          description: ID del sello discográfico (opcional) - puede ser número o UUID
     MerchUpdateInput:
       type: object
       properties:
@@ -2999,10 +2999,10 @@ components:
           - otro
         artistId:
           type: string
-          format: uuid
+          description: ID del artista - puede ser número o UUID
         labelId:
           type: string
-          format: uuid
+          description: ID del sello discográfico - puede ser número o UUID
         availability:
           type: string
           enum:

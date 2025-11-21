@@ -57,15 +57,13 @@ model Track {
 }
 
 model Artist {
-  id     String      @id @default(uuid())
-  name   String
-  merch  MerchItem[] @relation("ArtistMerch")
+  id   String @id @default(uuid())
+  name String
 }
 
 model Label {
-  id     String      @id @default(uuid())
-  name   String      @unique
-  merch  MerchItem[] @relation("LabelMerch")
+  id   String @id @default(uuid())
+  name String @unique
 }
 
 model Image {
@@ -74,8 +72,7 @@ model Image {
   width     Int
   height    Int
   url       String
-  album     Album?     @relation // Relación inversa
-  merchItem MerchItem? @relation("MerchCover")
+  album     Album?     @relation // Relación inversa con Album
 }
 
 model Audio {
@@ -142,15 +139,12 @@ model MerchItem {
   sku    String? @unique
   active Boolean @default(true)
 
-  // Relaciones (opcionales) — NOMBRADAS para evitar choques con otras
-  artist   Artist? @relation(name: "ArtistMerch", fields: [artistId], references: [id])
-  artistId String?
-  label    Label?  @relation(name: "LabelMerch", fields: [labelId], references: [id])
+  // IDs de referencia a otros microservicios (sin FK, solo strings)
+  artistId String? // ID del artista (puede ser número o UUID) - REFERENCIA A USUARIOS BD
   labelId  String?
-
-  // Portada opcional; la hacemos 1–1 (coverId único) y relación NOMBRADA
-  cover   Image?  @relation(name: "MerchCover", fields: [coverId], references: [id])
-  coverId String? @unique
+  
+  // Portada opcional como referencia simple (sin FK)
+  coverId String? // ID de la imagen de portada (opcional, sin relación FK)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
