@@ -49,7 +49,9 @@ module.exports.albumsAlbumIdDELETE = function (req, res, next, albumId, hard) {
 };
 
 module.exports.albumsAlbumIdGET = function (req, res, next, albumId, include) {
-  Albums.albumsAlbumIdGET(req.openapi.pathParams.albumId, include)
+  // Obtener include de query params en lugar del parámetro de función
+  const includeParam = req.query.include || req.openapi?.queryParams?.include || include;
+  Albums.albumsAlbumIdGET(req.openapi.pathParams.albumId, includeParam)
     .then((r) => utils.writeJson(res, r))
     .catch((e) =>
       utils.writeJson(res, { message: e.message }, e.status || 500)
