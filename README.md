@@ -10,7 +10,60 @@ To run the server, run:
 npm start
 ```
 
-To view the Swagger UI interface:
+## UnderSound Content API
+
+### Subida de Imágenes y Audio (Actualizado)
+
+Este servicio ahora admite subida de archivos reales vía **multipart/form-data** para álbumes, merchandising y pistas:
+
+| Recurso | Endpoint | Campo form | Carpeta | Resultado |
+|---------|----------|------------|---------|-----------|
+| Álbum   | `POST /albums/{albumId}/cover` | `file` | `uploads/covers/` | Se crea `Image` y se vincula `coverId` |
+| Merch   | `POST /merch/{merchId}/images` | `files[]` (múltiples) | `uploads/merch/` | Se crean varias `Image`; la primera se asigna a `coverId` si no existía |
+| Audio Pista | `POST /tracks/{trackId}/audio` | `file` | `uploads/audio/` | Upsert del registro `Audio` asociado |
+
+El archivo se almacena en disco (contenedor) y se expone estáticamente vía `GET /uploads/...`. Para persistencia entre reinicios en Docker, monta un volumen:
+
+```yaml
+services:
+	contenido:
+		image: contenidos:latest
+		volumes:
+			- contenido_uploads:/app/uploads
+volumes:
+	contenido_uploads: {}
+```
+
+### Migración Prisma
+
+No hay campo de portada en `Track`. Las pistas usan la portada del álbum.
+Si tienes migraciones locales antiguas que añaden `coverUrl` elimínalas o neutralízalas y ejecuta:
+
+```bash
+npx prisma migrate dev
+```
+
+### Flujo recomendado
+
+1. Crear álbum (`POST /albums`).
+2. Subir portada (`POST /albums/{id}/cover`).
+3. Añadir pistas (`POST /albums/{id}/tracks`).
+4. Para cada pista, opcionalmente subir audio (`POST /tracks/{trackId}/audio`). La portada de la pista se deriva de la portada del álbum.
+5. Crear merch (`POST /merch`).
+6. Subir imágenes (`POST /merch/{id}/images`).
+
+### Frontend
+
+Se actualizaron componentes Angular para permitir selección de archivos en la creación de álbum y merchandising. Revisa `upload-album.component.*` y `upload-merch.component.*`.
+
+### Notas de Seguridad
+
+Actualmente no se hace validación profunda de tipo MIME ni dimensionado real de las imágenes (width/height se guarda en 0). Se recomienda añadir:
+
+- Verificación de tipo con una whitelist (`image/jpeg`, `image/png`, `image/webp`).
+- Límites de tamaño (ya configurados en multer). 
+- Limpieza periódica de archivos huérfanos.
+
 
 ```
 open http://localhost:8081/docs

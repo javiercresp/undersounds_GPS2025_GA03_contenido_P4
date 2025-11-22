@@ -25,6 +25,12 @@ ENV NODE_ENV=production \
 
 COPY --from=builder /app /app
 
+# Ensure uploads directory exists (bind as volume in docker-compose)
+RUN mkdir -p /app/uploads/covers /app/uploads/merch /app/uploads/audio /app/uploads/track-covers \
+    && chown -R node:node /app/uploads
+
+VOLUME ["/app/uploads"]
+
 EXPOSE 8081
 
 CMD ["node", "index.js"]

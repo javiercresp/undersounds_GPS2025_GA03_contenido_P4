@@ -105,7 +105,16 @@ exports.merchGET = async function (
       prisma.merchItem.count({ where }),
     ]);
 
-    return { data: rows, meta: { total, page: pageNum, limit: pageSize } };
+    // Enrich with cover image objects (batch fetch by coverId)
+    const coverIds = rows.map(r => r.coverId).filter(Boolean);
+    let coverMap = new Map();
+    if (coverIds.length) {
+      const images = await prisma.image.findMany({ where: { id: { in: coverIds } } });
+      coverMap = new Map(images.map(img => [img.id, img]));
+    }
+    const data = rows.map(r => (coverMap.size && r.coverId ? { ...r, cover: coverMap.get(r.coverId) || null } : r));
+
+    return { data, meta: { total, page: pageNum, limit: pageSize } };
   } catch (err) {
     console.error("[merchGET] error", err?.message || err);
     // Devolver error controlado para que Swagger muestre un mensaje legible
@@ -255,6 +264,15 @@ exports.merchMerchIdGET = async function (merchId) {
     const err = new Error("Merch not found");
     err.status = 404;
     throw err;
+  }
+  if (merch.coverId) {
+    try {
+      const cover = await prisma.image.findUnique({ where: { id: merch.coverId } });
+      return { data: { ...merch, cover } };
+    } catch (_) {
+      // Fall back to base merch if cover lookup fails
+      return { data: merch };
+    }
   }
   return { data: merch };
 };

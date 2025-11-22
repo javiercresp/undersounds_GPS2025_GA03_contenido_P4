@@ -77,3 +77,5 @@ module.exports.tracksTrackIdAudioPOST = function tracksTrackIdAudioPOST (req, re
       });
   });
 };
+
+// Note: tracks do not support their own cover uploads; they use album cover.

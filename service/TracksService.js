@@ -22,30 +22,28 @@ const toInt = (v, def) => {
 const buildInclude = (includeCsv) => {
   const allowed = ["album", "audio", "lyrics", "stats"];
   // Default: include all relations
+  let parts;
   if (!includeCsv) {
-    const d = {};
-    for (const a of allowed) d[a] = true;
-    return d;
-  }
-
-  // Normalize input: accept CSV string, array, or single string
-  let parts = [];
-  if (Array.isArray(includeCsv)) {
+    parts = allowed.slice();
+  } else if (Array.isArray(includeCsv)) {
     parts = includeCsv.map(String).map((s) => s.trim()).filter(Boolean);
   } else if (typeof includeCsv === 'string') {
     parts = includeCsv.split(',').map((s) => s.trim()).filter(Boolean);
   } else if (includeCsv && typeof includeCsv === 'object') {
-    // If router provides an object (sometimes frameworks do), extract keys
     parts = Object.keys(includeCsv).map(String).map((s) => s.trim()).filter(Boolean);
   } else {
     parts = [String(includeCsv)];
   }
 
+  // Prisma include object, nesting album.cover when album is requested
   const include = {};
   for (const p of parts) {
-    if (allowed.includes(p)) include[p] = true;
+    if (!allowed.includes(p)) continue;
+    if (p === 'album') include.album = { include: { cover: true } };
+    else include[p] = true;
   }
-  // ensure defaults (explicit booleans expected by Prisma)
+
+  // Ensure booleans for any omitted keys (explicit flags help consistency)
   for (const a of allowed) if (include[a] === undefined) include[a] = false;
   return include;
 };
@@ -169,10 +167,11 @@ exports.tracksGET = async function (
       console.log('[tracksGET] include=', JSON.stringify(buildInclude(include)));
     }
 
+    const includeObj = buildInclude(include);
     const [rows, total] = await Promise.all([
       prisma.track.findMany({
         where,
-        include: buildInclude(include),
+        include: includeObj,
         orderBy: { [sortField]: sortOrder },
         skip,
         take: pageSize,
@@ -190,7 +189,8 @@ exports.tracksGET = async function (
                 .map((s) => s.trim())
                 .filter(Boolean)[0] || null
             : null;
-          return { ...r, genre: first };
+          const coverUrl = r?.album?.cover?.url || null; // derive album cover for track
+          return { ...r, genre: first, coverUrl };
         })
       : rows;
 
@@ -272,7 +272,8 @@ exports.tracksTrackIdGET = async function (trackId, include) {
     throw err;
   }
 
-  return { data: track };
+  const coverUrl = track?.album?.cover?.url || null;
+  return { data: { ...track, coverUrl } };
 };
 
 

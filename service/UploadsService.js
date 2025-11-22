@@ -32,7 +32,9 @@ exports.albumsAlbumIdCoverPOST = async function (albumId, file) {
   const updated = await prisma.album.update({
     where: { id: albumId },
     data: { coverId: createdImage.id },
-    include: { cover: true, tracks: true, label: true, stats: true, artist: true },
+    // Album schema does not define artist/label relations, only scalar ids.
+    // Include only existing relations to avoid Prisma include errors.
+    include: { cover: true, tracks: true, stats: true },
   });
 
   return { data: updated };
@@ -68,8 +70,18 @@ exports.merchMerchIdImagesPOST = async function (merchId, files) {
     await prisma.merchItem.update({ where: { id: merchId }, data: { coverId: created[0].id } });
   }
 
-  // return merch with cover
-  const out = await prisma.merchItem.findUnique({ where: { id: merchId }, include: { cover: true } });
+  // return merch item (no Prisma include available for cover on MerchItem)
+  const out = await prisma.merchItem.findUnique({ where: { id: merchId } });
+  // Optionally enrich with cover object for client convenience
+  if (out && out.coverId) {
+    try {
+      const cover = await prisma.image.findUnique({ where: { id: out.coverId } });
+      return { data: { ...out, cover } };
+    } catch (_) {
+      // if cover fetch fails, still return base merch item
+      return { data: out };
+    }
+  }
   return { data: out };
 };
 
@@ -116,5 +128,34 @@ exports.tracksTrackIdAudioPOST = async function (trackId, file) {
 
   return { data: updated };
 };
+
+/**
+ * Subir o actualizar portada (imagen) de una pista
+ */
+// exports.tracksTrackIdCoverPOST removed: tracks use album cover
+/*
+  if (!file) {
+    const err = new Error('No file uploaded');
+    err.status = 400;
+    throw err;
+  }
+
+  const track = await prisma.track.findUnique({ where: { id: trackId } });
+  if (!track) {
+    const err = new Error('Track not found');
+    err.status = 404;
+    throw err;
+  }
+
+  const url = fileUrlFor('track-covers', file.filename);
+
+  const updated = await prisma.track.update({
+    where: { id: trackId },
+    data: { coverUrl: url },
+    include: { album: true, audio: true, lyrics: true, stats: true },
+  });
+
+  return { data: updated };
+*/
 
 

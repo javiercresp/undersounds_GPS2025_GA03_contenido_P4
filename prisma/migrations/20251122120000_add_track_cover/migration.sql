@@ -1,0 +1,1 @@
+-- Reverted: track-specific cover was removed. No-op migration to keep history.
