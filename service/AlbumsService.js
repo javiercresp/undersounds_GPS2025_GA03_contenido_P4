@@ -111,10 +111,14 @@ exports.albumsAlbumIdDELETE = async function (albumId, hard) {
 };
 
 exports.albumsAlbumIdGET = async function (albumId, include) {
+  console.log('[albumsAlbumIdGET] albumId=', albumId, 'include=', include);
+  const includeObj = buildInclude(include);
+  console.log('[albumsAlbumIdGET] includeObj=', includeObj);
   const album = await prisma.album.findUnique({
     where: { id: albumId },
-    include: buildInclude(include),
+    include: includeObj,
   });
+  console.log('[albumsAlbumIdGET] album=', album);
   if (!album) {
     const err = new Error("Álbum no encontrado");
     err.status = 404;
