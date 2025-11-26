@@ -119,6 +119,32 @@ app.post('/tracks/:trackId/audio', makeMulferForRoute('audio').single('file'), (
       utils.writeJson(res, { data: { message: err?.message || 'Error' }, status: err?.status || 500 }, err?.status || 500);
     });
 });
+
+// ✅ NUEVO: Crear track con audio (multipart)
+const TracksService = require('./service/TracksService');
+app.post('/tracks', makeMulferForRoute('audio').single('file'), (req, res, next) => {
+  // Si es multipart, req.body estará poblado por multer (text fields) y req.file por el archivo
+  // Si es JSON, multer no hará nada con el body (o lo parseará si es multipart sin archivo)
+  // Pero como usamos express.json() antes, si el content-type es application/json, express lo maneja.
+  // Si es multipart/form-data, multer lo maneja.
+  
+  // Si hay archivo, delegamos a una nueva función en TracksService o modificamos tracksPOST
+  if (req.is('multipart/form-data')) {
+    console.log('[UPLOAD] /tracks received file=', req.file && { originalname: req.file.originalname, filename: req.file.filename });
+    console.log('[UPLOAD] /tracks received body=', req.body);
+    
+    TracksService.tracksPOST(req.body, req.file)
+      .then(response => utils.writeJson(res, response))
+      .catch(err => {
+        console.error('[tracksPOST multipart]', err?.message || err);
+        utils.writeJson(res, { data: { message: err?.message || 'Error' }, status: err?.status || 500 }, err?.status || 500);
+      });
+  } else {
+    // Si no es multipart, dejamos pasar al siguiente middleware (oas3-tools)
+    next();
+  }
+});
+
 // Servir archivos estáticos subidos en /uploads
 const uploadsDir = path.join(__dirname, 'uploads');
 try {

@@ -61,6 +61,8 @@ const stripDiacritics = (s) => {
 };
 const stripPunctuation = (s) => s.replace(/[\.&'’_/]+/g, ' ');
 
+const fileUrlFor = (subfolder, filename) => `/uploads/${subfolder}/${filename}`;
+
 exports.tracksGET = async function (
   page,
   limit,
@@ -203,8 +205,9 @@ exports.tracksGET = async function (
   }
 };
 
-exports.tracksPOST = async function (body) {
+exports.tracksPOST = async function (body, file) {
   console.log("[tracksPOST] body =", body);
+  if (file) console.log("[tracksPOST] file =", file.filename);
 
   // albumId is required: a track must belong to an existing album
   if (!body?.albumId) {
@@ -213,22 +216,46 @@ exports.tracksPOST = async function (body) {
     throw err;
   }
 
-  const album = await prisma.album.findUnique({ where: { id: body.albumId } });
+  const album = await prisma.album.findUnique({ where: { id: body.albumId }, include: { tracks: true } });
   if (!album) {
     const err = new Error(`Album with id ${body.albumId} not found`);
     err.status = 400;
     throw err;
   }
 
+  // Validate trackNumber uniqueness if provided
+  if (body.trackNumber) {
+    const num = Number(body.trackNumber);
+    const exists = album.tracks.some(t => t.trackNumber === num);
+    if (exists) {
+      const err = new Error(`Track number ${num} already exists in this album`);
+      err.status = 400;
+      throw err;
+    }
+  }
+
   const data = {
     title: body?.title ?? "untitled",
-    durationSec: body?.durationSec ?? null,
-    trackNumber: body?.trackNumber ?? null,
+    durationSec: body?.durationSec ? Number(body.durationSec) : null,
+    trackNumber: body?.trackNumber ? Number(body.trackNumber) : null,
     album: { connect: { id: body.albumId } },
   };
 
-  // audio (optional)
-  if (body?.audio) {
+  // audio (file upload or JSON body)
+  if (file) {
+    const url = fileUrlFor('audio', file.filename);
+    const mime = (file.mimetype || '').split('/')[1] || null;
+    const codec = body.codec || (mime ? mime.split('+')[0] : null);
+    const bitrate = body.bitrate ? Number(body.bitrate) : 0;
+
+    data.audio = {
+      create: {
+        codec: codec,
+        bitrate: bitrate,
+        url: url,
+      },
+    };
+  } else if (body?.audio) {
     data.audio = {
       create: {
         codec: body.audio.codec ?? null,
