@@ -185,6 +185,7 @@ exports.albumsPOST = async function (body) {
       title,
       description = null,
       releaseDate = null,
+      releaseState = null,
       price = null,
       currency = null,
       genres = [], // llega array por OpenAPI
@@ -214,7 +215,7 @@ exports.albumsPOST = async function (body) {
       releaseDate: releaseDate ? new Date(releaseDate) : null,
       price,
       currency,
-      releaseState: "draft",
+      releaseState: releaseState || "draft",
       genres: genresStr, // si usas arrays en BD, guarda 'genres' directamente
       tags: tagsStr, // idem
       artistId: artistIdStr, // Almacenar directamente como string, sin conexión forzada
