@@ -414,7 +414,7 @@ exports.tracksTrackIdCommentsGET = async function (trackId, page, limit) {
  * trackId UUID
  * returns CommentResponse
  **/
-exports.tracksTrackIdCommentsPOST = function (body, trackId) {
+exports.tracksTrackIdCommentsPOST = async function (body, trackId) {
   try {
     const created = await prisma.comment.create({
       data: {
