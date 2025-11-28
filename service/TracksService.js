@@ -149,6 +149,12 @@ exports.tracksGET = async function (
         albumFilters.OR = variants.map((v) => ({ genres: { contains: v } }));
       }
     }
+
+      if (tag && String(tag).trim()) {
+        albumFilters.tags = { contains: String(tag).trim() };
+      }
+
+  
     if (releasedFrom || releasedTo) {
       albumFilters.releaseDate = {};
       if (releasedFrom) albumFilters.releaseDate.gte = new Date(releasedFrom);
@@ -164,11 +170,20 @@ exports.tracksGET = async function (
     };
 
     // Ordenación
-    const validSortFields = ["durationSec", "title", "createdAt"];
+    //const validSortFields = ["durationSec", "title", "createdAt"];
     const validOrder = ["asc", "desc"];
-    const sortField = validSortFields.includes(sort) ? sort : "createdAt";
+    //const sortField = validSortFields.includes(sort) ? sort : "createdAt";
     const sortOrder = validOrder.includes(order) ? order : "desc";
 
+    let orderBy;
+    if(sort === "playCount") {
+      orderBy = { stats: {playCount: sortOrder} };
+    }
+    else {
+      const validSortFields = ["durationSec", "title", "createdAt"];
+      const sortField = validSortFields.includes(sort) ? sort : "createdAt";
+      orderBy = { [sortField]: sortOrder};
+    }
     // Debug opcional
     if (process.env.DEBUG_CONTENT === '1') {
       console.log('[tracksGET] where=', JSON.stringify(where));
@@ -180,7 +195,7 @@ exports.tracksGET = async function (
       prisma.track.findMany({
         where,
         include: includeObj,
-        orderBy: { [sortField]: sortOrder },
+        orderBy,
         skip,
         take: pageSize,
       }),
