@@ -105,6 +105,10 @@ exports.tracksGET = async function (
       trackFilters.albumId = albumId;
     }
 
+    if (language && String(language).trim()) {
+      trackFilters.language = { equals: String(language).trim() };
+    }
+
     const albumFilters = {};
     if (artistId !== undefined && artistId !== null) {
       const artistIdStr = String(artistId).trim();
