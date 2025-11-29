@@ -34,7 +34,31 @@ const buildInclude = (includeCsv) => {
   return Object.keys(include).length ? include : undefined;
 };
 
-const like = (q) => ({ contains: q.toLowerCase() });
+// SQLite workaround: Prisma `mode: 'insensitive'` is not supported on SQLite.
+// Use simple `contains` and rely on variant generation to cover cases.
+const like = (q) => ({ contains: String(q || '') });
+
+// Helpers to normalize genre variants similar to TracksService
+const stripDiacritics = (s) =>
+  (s || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+const stripPunctuation = (s) => (s || '').replace(/[\p{P}\p{S}]/gu, '');
+
+const sepVariants = (s) => [
+  s,
+  s.replace(/\s+/g, ' ').trim(),
+  s.replace(/\s+/g, '-'),
+  s.replace(/-/g, ' '),
+  s.replace(/[\s-]+/g, ''), // fused: "hip hop" -> "hiphop"
+];
+
+const toTitleCase = (s) =>
+  s
+    .split(/([\s-]+)/)
+    .map((part) => (/^[\s-]+$/.test(part) ? part : (part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())))
+    .join('');
 
 // ----------------- COMMENTS -----------------
 
@@ -419,11 +443,43 @@ exports.albumsGET = async function (
   if (labelId) where.labelId = labelId;
   if (releaseState) where.releaseState = releaseState;
 
-  // Si usas CSV en BD:
-  if (genre) where.genres = like(genre);
-  if (tag) where.tags = like(tag);
+  // Build AND conditions to combine multiple filters cleanly
+  const andConds = [];
 
-  if (q) where.OR = [{ title: like(q) }, { description: like(q) }];
+  // Género: generar variantes (espacios, guiones, fusionado) y casos
+  if (genre && String(genre).trim()) {
+    const gRaw = String(genre).trim();
+    const gClean = stripPunctuation(stripDiacritics(gRaw));
+
+    const base = [
+      ...sepVariants(gRaw),
+      ...sepVariants(gClean),
+    ];
+    const withCase = base.flatMap((v) => [
+      v,
+      v.toLowerCase(),
+      v.toUpperCase(),
+      toTitleCase(v),
+    ]);
+    const variants = Array.from(new Set(withCase)).filter(Boolean);
+
+    // Combine variants with OR; each uses simple contains (no mode flag)
+    andConds.push({ OR: variants.map((v) => ({ genres: { contains: v } })) });
+  }
+
+  // Tag: coincide dentro del CSV de tags (insensible a mayúsculas)
+  if (tag && String(tag).trim()) {
+    andConds.push({ tags: like(String(tag).trim()) });
+  }
+
+  // Búsqueda de texto libre en título o descripción
+  if (q && String(q).trim()) {
+    andConds.push({ OR: [{ title: like(q) }, { description: like(q) }] });
+  }
+
+  if (andConds.length) {
+    where.AND = andConds;
+  }
 
   const [rows, total] = await Promise.all([
     prisma.album.findMany({
