@@ -124,7 +124,7 @@ module.exports.commentsPOST = function commentsPOST (req, res, next, body) {
 };
 
 module.exports.merchMerchIdCommentsGET = function merchMerchIdCommentsGET (req, res, next, merchId, page, limit) {
-  Comments.merchMerchIdCommentsGET(merchId, page, limit)
+  Comments.merchMerchIdCommentsGET(limit, merchId, page)
     .then(function (response) {
       utils.writeJson(res, response);
     })

@@ -40,8 +40,8 @@ module.exports.albumsAlbumIdCoverPOST = function (req, res, next, albumId) {
     );
 };
 
-module.exports.albumsAlbumIdDELETE = function (req, res, next, albumId, hard) {
-  Albums.albumsAlbumIdDELETE(albumId, hard)
+module.exports.albumsAlbumIdDELETE = function (req, res, next, albumId) {
+  Albums.albumsAlbumIdDELETE(albumId)
     .then(() => res.status(204).end())
     .catch((e) =>
       utils.writeJson(res, { message: e.message }, e.status || 500)

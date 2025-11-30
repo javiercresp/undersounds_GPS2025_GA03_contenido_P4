@@ -66,7 +66,8 @@ exports.merchMerchIdImagesPOST = async function (merchId, files) {
     err.status = 404;
     throw err;
   }
-  if (!merch.coverId) {
+  // Always update cover with the first uploaded image
+  if (created.length > 0) {
     await prisma.merchItem.update({ where: { id: merchId }, data: { coverId: created[0].id } });
   }
 

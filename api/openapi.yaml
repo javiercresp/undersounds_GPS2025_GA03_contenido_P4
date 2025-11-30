@@ -205,15 +205,8 @@ paths:
         schema:
           type: string
           format: uuid
-      - name: hard
-        in: query
-        description: "Si true, borrado físico irreversible"
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: boolean
-          default: false
+      # NOTE: 'hard' query parameter removed. DELETE /albums/{albumId} is
+      # always irreversible and will remove the album and its tracks.
       responses:
         "204":
           description: Eliminado
@@ -520,7 +513,7 @@ paths:
         explode: true
         schema:
           type: string
-          format: uuid
+          description: Puede ser UUID o ID numérico del artista
       - name: labelId
         in: query
         required: false
@@ -1003,6 +996,7 @@ paths:
           enum:
           - name
           - price
+          - createdAt
       - name: order
         in: query
         required: false

@@ -110,7 +110,16 @@ exports.usersUserIdFavoritesMerchGET = async function (userId, page, limit) {
     ? await prisma.merchItem.findMany({ where: { id: { in: ids } } })
     : [];
 
-  return { data: items, meta: { total, page: pageNum, limit: pageSize } };
+  // Enrich with cover image objects (same as merchGET)
+  const coverIds = items.map(r => r.coverId).filter(Boolean);
+  let coverMap = new Map();
+  if (coverIds.length) {
+    const images = await prisma.image.findMany({ where: { id: { in: coverIds } } });
+    coverMap = new Map(images.map(img => [img.id, img]));
+  }
+  const data = items.map(r => (coverMap.size && r.coverId ? { ...r, cover: coverMap.get(r.coverId) || null } : r));
+
+  return { data, meta: { total, page: pageNum, limit: pageSize } };
 };
 
 exports.usersUserIdFavoritesMerchPOST = async function (body, userId) {

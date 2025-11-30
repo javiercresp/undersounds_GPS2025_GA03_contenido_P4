@@ -61,6 +61,8 @@ const stripDiacritics = (s) => {
 };
 const stripPunctuation = (s) => s.replace(/[\.&'’_/]+/g, ' ');
 
+const fileUrlFor = (subfolder, filename) => `/uploads/${subfolder}/${filename}`;
+
 exports.tracksGET = async function (
   page,
   limit,
@@ -103,7 +105,17 @@ exports.tracksGET = async function (
       trackFilters.albumId = albumId;
     }
 
+    if (language && String(language).trim()) {
+      trackFilters.language = { equals: String(language).trim() };
+    }
+
     const albumFilters = {};
+    if (artistId !== undefined && artistId !== null) {
+      const artistIdStr = String(artistId).trim();
+      if (artistIdStr) {
+        albumFilters.artistId = artistIdStr;
+      }
+    }
     if (genre && String(genre).trim()) {
       // Normaliza variantes comunes (espacios vs guiones) y tolera mayúsculas/minúsculas
       const gRaw = String(genre).trim();
@@ -141,6 +153,12 @@ exports.tracksGET = async function (
         albumFilters.OR = variants.map((v) => ({ genres: { contains: v } }));
       }
     }
+
+      if (tag && String(tag).trim()) {
+        albumFilters.tags = { contains: String(tag).trim() };
+      }
+
+  
     if (releasedFrom || releasedTo) {
       albumFilters.releaseDate = {};
       if (releasedFrom) albumFilters.releaseDate.gte = new Date(releasedFrom);
@@ -156,10 +174,21 @@ exports.tracksGET = async function (
     };
 
     // Ordenación
-    const validSortFields = ["durationSec", "title", "createdAt"];
+    //const validSortFields = ["durationSec", "title", "createdAt"];
     const validOrder = ["asc", "desc"];
-    const sortField = validSortFields.includes(sort) ? sort : "createdAt";
+    //const sortField = validSortFields.includes(sort) ? sort : "createdAt";
     const sortOrder = validOrder.includes(order) ? order : "desc";
+
+    let orderBy;
+    if (sort === "playCount") {
+      orderBy = [{ stats: { playCount: sortOrder } }, { title: "asc" }];
+    } else if (sort === "title") {
+      orderBy = [{ title: sortOrder }, { createdAt: "desc" }];
+    } else if (sort === "durationSec") {
+      orderBy = [{ durationSec: sortOrder }, { title: "asc" }];
+    } else {
+      orderBy = [{ createdAt: sortOrder }];
+    }
 
     // Debug opcional
     if (process.env.DEBUG_CONTENT === '1') {
@@ -172,7 +201,7 @@ exports.tracksGET = async function (
       prisma.track.findMany({
         where,
         include: includeObj,
-        orderBy: { [sortField]: sortOrder },
+        orderBy,
         skip,
         take: pageSize,
       }),
@@ -203,8 +232,9 @@ exports.tracksGET = async function (
   }
 };
 
-exports.tracksPOST = async function (body) {
+exports.tracksPOST = async function (body, file) {
   console.log("[tracksPOST] body =", body);
+  if (file) console.log("[tracksPOST] file =", file.filename);
 
   // albumId is required: a track must belong to an existing album
   if (!body?.albumId) {
@@ -213,22 +243,46 @@ exports.tracksPOST = async function (body) {
     throw err;
   }
 
-  const album = await prisma.album.findUnique({ where: { id: body.albumId } });
+  const album = await prisma.album.findUnique({ where: { id: body.albumId }, include: { tracks: true } });
   if (!album) {
     const err = new Error(`Album with id ${body.albumId} not found`);
     err.status = 400;
     throw err;
   }
 
+  // Validate trackNumber uniqueness if provided
+  if (body.trackNumber) {
+    const num = Number(body.trackNumber);
+    const exists = album.tracks.some(t => t.trackNumber === num);
+    if (exists) {
+      const err = new Error(`Track number ${num} already exists in this album`);
+      err.status = 400;
+      throw err;
+    }
+  }
+
   const data = {
     title: body?.title ?? "untitled",
-    durationSec: body?.durationSec ?? null,
-    trackNumber: body?.trackNumber ?? null,
+    durationSec: body?.durationSec ? Number(body.durationSec) : null,
+    trackNumber: body?.trackNumber ? Number(body.trackNumber) : null,
     album: { connect: { id: body.albumId } },
   };
 
-  // audio (optional)
-  if (body?.audio) {
+  // audio (file upload or JSON body)
+  if (file) {
+    const url = fileUrlFor('audio', file.filename);
+    const mime = (file.mimetype || '').split('/')[1] || null;
+    const codec = body.codec || (mime ? mime.split('+')[0] : null);
+    const bitrate = body.bitrate ? Number(body.bitrate) : 0;
+
+    data.audio = {
+      create: {
+        codec: codec,
+        bitrate: bitrate,
+        url: url,
+      },
+    };
+  } else if (body?.audio) {
     data.audio = {
       create: {
         codec: body.audio.codec ?? null,
@@ -258,7 +312,8 @@ exports.tracksPOST = async function (body) {
 exports.tracksTrackIdGET = async function (trackId, include) {
   const includeOptions = buildInclude(include) || {};
 
-  // Asegura que siempre traigamos las estadísticas para exponer el playCount
+  // Forzar que siempre incluya album con cover y stats
+  includeOptions.album = { include: { cover: true } };
   includeOptions.stats = true;
 
   const track = await prisma.track.findUnique({
@@ -308,7 +363,22 @@ exports.tracksTrackIdPATCH = async function (body, trackId) {
  */
 exports.tracksTrackIdDELETE = async function (trackId) {
   try {
-    await prisma.track.delete({ where: { id: trackId } });
+    await prisma.$transaction(async (tx) => {
+      // Remove 1:1 dependent rows first to satisfy FK constraints
+      await tx.audio.deleteMany({ where: { trackId } });
+      await tx.lyrics.deleteMany({ where: { trackId } });
+      await tx.trackStats.deleteMany({ where: { trackId } });
+
+      // Clean up loosely-related records referencing this track
+      if (tx.comment) {
+        await tx.comment.deleteMany({ where: { targetType: 'track', targetId: trackId } });
+      }
+      if (tx.favorite) {
+        await tx.favorite.deleteMany({ where: { targetType: 'track', targetId: trackId } });
+      }
+
+      await tx.track.delete({ where: { id: trackId } });
+    });
     return { data: { message: 'Track deleted' } };
   } catch (err) {
     const e = new Error(err.message || 'Failed to delete track');
