@@ -996,6 +996,7 @@ paths:
           enum:
           - name
           - price
+          - createdAt
       - name: order
         in: query
         required: false
