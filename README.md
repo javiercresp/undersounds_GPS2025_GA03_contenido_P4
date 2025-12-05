@@ -69,4 +69,4 @@ Actualmente no se hace validación profunda de tipo MIME ni dimensionado real de
 open http://localhost:8081/docs
 ```
 
-This project leverages the mega-awesome [swagger-tools](https://github.com/apigee-127/swagger-tools) middleware which does most all the work.
+This project leverages the mega-awesome [swagger-tools](https://github.com/apigee-127/swagger-tools) middleware which does most all the work .
