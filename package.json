@@ -1,0 +1,30 @@
+{
+  "name": "undersound-content-api",
+  "version": "1.0.0",
+  "description": "API de contenido inspirada en Bandcamp para gestionar **álbumes, pistas, merchandising, labels y comentarios**. Incluye paginación, filtros, subida de archivos (multipart), acciones de publicación y favoritos. ",
+  "main": "index.js",
+  "scripts": {
+    "prestart": "npm install",
+    "start": "node index.js",
+    "prisma:migrate": "prisma migrate dev --name init",
+    "prisma:generate": "prisma generate",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "node prisma/seed.js"
+  },
+  "keywords": [
+    "swagger"
+  ],
+  "license": "Unlicense",
+  "private": true,
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "connect": "^3.2.0",
+    "cors": "^2.8.5",
+    "js-yaml": "^3.3.0",
+    "multer": "^1.4.5-lts.1",
+    "oas3-tools": "^2.2.3"
+  },
+  "devDependencies": {
+    "prisma": "^6.19.0"
+  }
+}

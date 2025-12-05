@@ -1,16 +1,36 @@
-FROM python:3.6-alpine
+# syntax=docker/dockerfile:1.6
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+FROM node:20-slim AS builder
+WORKDIR /app
 
-COPY requirements.txt /usr/src/app/
+# Install dependencies
+COPY package*.json ./
+RUN npm ci
 
-RUN pip3 install --no-cache-dir -r requirements.txt
+# Generate Prisma client before pruning dev dependencies
+COPY prisma ./prisma
+RUN npx prisma generate
 
-COPY . /usr/src/app
+# Copy application source
+COPY . .
 
-EXPOSE 8080
+# Remove development dependencies for runtime image
+RUN npm prune --omit=dev
 
-ENTRYPOINT ["python3"]
+FROM node:20-slim
+WORKDIR /app
 
-CMD ["-m", "swagger_server"]
+ENV NODE_ENV=production \
+    PORT=8081
+
+COPY --from=builder /app /app
+
+# Ensure uploads directory exists (bind as volume in docker-compose)
+RUN mkdir -p /app/uploads/covers /app/uploads/merch /app/uploads/audio /app/uploads/track-covers \
+    && chown -R node:node /app/uploads
+
+VOLUME ["/app/uploads"]
+
+EXPOSE 8081
+
+CMD ["node", "index.js"]
