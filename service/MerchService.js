@@ -1,6 +1,87 @@
 "use strict";
 
 /**
+ * Helper: Obtiene una instancia de Prisma Client reutilizable
+ */
+const getPrismaClient = () => {
+  const { PrismaClient } = require("@prisma/client");
+  let prisma;
+  try {
+    const prismaModule = require("../src/db/prisma");
+    prisma = prismaModule?.prisma || prismaModule?.default || prismaModule;
+    if (!prisma) prisma = new PrismaClient();
+  } catch (e) {
+    prisma = new PrismaClient();
+  }
+  return prisma;
+};
+
+/**
+ * Helper: Mapea el tipo de producto desde la API al enum de Prisma
+ */
+const mapMerchType = (type) => {
+  if (!type) return undefined;
+  const s = String(type).toLowerCase();
+  switch (s) {
+    case "camiseta":
+      return "SHIRT";
+    case "hoody":
+    case "hoodie":
+      return "HOODIE";
+    case "vinilo":
+      return "VINYL";
+    case "cd":
+      return "CD";
+    case "poster":
+      return "POSTER";
+    case "pegatina":
+      return "STICKER";
+    case "otro":
+      return "OTHER";
+    default:
+      return String(type).toUpperCase();
+  }
+};
+
+/**
+ * Helper: Construye el objeto patch para actualizar un producto de merch
+ */
+const buildMerchPatch = (body) => {
+  const patch = {};
+  if (Object.prototype.hasOwnProperty.call(body ?? {}, "name"))
+    patch.title = body.name;
+  if (Object.prototype.hasOwnProperty.call(body ?? {}, "description"))
+    patch.description = body.description;
+  if (Object.prototype.hasOwnProperty.call(body ?? {}, "type") && body.type) {
+    patch.category = mapMerchType(body.type);
+  }
+  if (Object.prototype.hasOwnProperty.call(body ?? {}, "price"))
+    patch.priceCents = body.price
+      ? Math.round(Number(body.price) * 100)
+      : undefined;
+  if (Object.prototype.hasOwnProperty.call(body ?? {}, "currency"))
+    patch.currency = body.currency;
+  if (Object.prototype.hasOwnProperty.call(body ?? {}, "stock"))
+    patch.stock = typeof body.stock === "number" ? body.stock : undefined;
+  if (Object.prototype.hasOwnProperty.call(body ?? {}, "sku"))
+    patch.sku = body.sku;
+  if (Object.prototype.hasOwnProperty.call(body ?? {}, "active"))
+    patch.active = !!body.active;
+
+  // IDs de referencia (sin relaciones FK)
+  if (body?.artistId) patch.artistId = body.artistId;
+  if (body?.labelId) patch.labelId = body.labelId;
+  
+  // Cover: si se envía coverId lo asignamos directamente (sin FK)
+  if (body?.coverId) patch.coverId = body.coverId;
+
+  // Eliminar propiedades undefined
+  Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
+  
+  return patch;
+};
+
+/**
  * Listar productos de merchandising
  *
  * page Integer  (optional)
@@ -26,17 +107,7 @@ exports.merchGET = async function (
   q
 ) {
   try {
-    // Implementación usando Prisma: listado paginado y filtros básicos
-    const { PrismaClient } = require("@prisma/client");
-    // prisma robust loader (reuse global if exists)
-    let prisma;
-    try {
-      const prismaModule = require("../src/db/prisma");
-      prisma = prismaModule?.prisma || prismaModule?.default || prismaModule;
-      if (!prisma) prisma = new PrismaClient();
-    } catch (e) {
-      prisma = new PrismaClient();
-    }
+    const prisma = getPrismaClient();
 
     const toInt = (v, def) => {
       const n = Number.parseInt(v, 10);
@@ -58,31 +129,7 @@ exports.merchGET = async function (
     if (q)
       where.OR = [{ title: { contains: q } }, { description: { contains: q } }];
     if (type) {
-      // map OpenAPI 'type' (spanish) to Prisma MerchCategory
-      const mapType = (t) => {
-        if (!t) return undefined;
-        const s = String(t).toLowerCase();
-        switch (s) {
-          case "camiseta":
-            return "SHIRT";
-          case "hoody":
-          case "hoodie":
-            return "HOODIE";
-          case "vinilo":
-            return "VINYL";
-          case "cd":
-            return "CD";
-          case "poster":
-            return "POSTER";
-          case "pegatina":
-            return "STICKER";
-          case "otro":
-            return "OTHER";
-          default:
-            return String(t).toUpperCase();
-        }
-      };
-      const cat = mapType(type);
+      const cat = mapMerchType(type);
       if (cat) where.category = cat;
     }
 
@@ -221,15 +268,7 @@ exports.merchMerchIdCommentsPOST = function (body, merchId) {
 exports.merchMerchIdDELETE = async function (merchId) {
   // Borrado duro; si prefieres soft-delete, cambia a una actualización de 'active'
   try {
-    const { PrismaClient } = require("@prisma/client");
-    let prisma;
-    try {
-      const prismaModule = require("../src/db/prisma");
-      prisma = prismaModule?.prisma || prismaModule?.default || prismaModule;
-      if (!prisma) prisma = new PrismaClient();
-    } catch (e) {
-      prisma = new PrismaClient();
-    }
+    const prisma = getPrismaClient();
     return prisma.merchItem
       .delete({ where: { id: merchId } })
       .then(() => undefined);
@@ -247,15 +286,7 @@ exports.merchMerchIdDELETE = async function (merchId) {
  **/
 exports.merchMerchIdGET = async function (merchId) {
   // Obtener detalle desde BD
-  const { PrismaClient } = require("@prisma/client");
-  let prisma;
-  try {
-    const prismaModule = require("../src/db/prisma");
-    prisma = prismaModule?.prisma || prismaModule?.default || prismaModule;
-    if (!prisma) prisma = new PrismaClient();
-  } catch (e) {
-    prisma = new PrismaClient();
-  }
+  const prisma = getPrismaClient();
 
   const merch = await prisma.merchItem.findUnique({
     where: { id: merchId },
@@ -285,15 +316,7 @@ exports.merchMerchIdGET = async function (merchId) {
  **/
 exports.merchMerchIdImagesPOST = async function (merchId) {
   // Crear imagen y asignarla como portada (cover) del merch
-  const { PrismaClient } = require("@prisma/client");
-  let prisma;
-  try {
-    const prismaModule = require("../src/db/prisma");
-    prisma = prismaModule?.prisma || prismaModule?.default || prismaModule;
-    if (!prisma) prisma = new PrismaClient();
-  } catch (e) {
-    prisma = new PrismaClient();
-  }
+  const prisma = getPrismaClient();
 
   // Creamos una imagen mínima; en un endpoint real deberías aceptar body con url/alt/size
   const createdImage = await prisma.image.create({
@@ -315,75 +338,14 @@ exports.merchMerchIdImagesPOST = async function (merchId) {
  * returns MerchResponse
  **/
 exports.merchMerchIdPATCH = async function (body, merchId) {
-  // Actualización parcial del merch
-  const { PrismaClient } = require("@prisma/client");
-  let prisma;
-  try {
-    const prismaModule = require("../src/db/prisma");
-    prisma = prismaModule?.prisma || prismaModule?.default || prismaModule;
-    if (!prisma) prisma = new PrismaClient();
-  } catch (e) {
-    prisma = new PrismaClient();
-  }
-
-  const patch = {};
-  if (Object.prototype.hasOwnProperty.call(body ?? {}, "name"))
-    patch.title = body.name;
-  if (Object.prototype.hasOwnProperty.call(body ?? {}, "description"))
-    patch.description = body.description;
-  if (Object.prototype.hasOwnProperty.call(body ?? {}, "type") && body.type) {
-    // map API type -> enum
-    const mapType = (t) => {
-      if (!t) return undefined;
-      const s = String(t).toLowerCase();
-      switch (s) {
-        case "camiseta":
-          return "SHIRT";
-        case "hoody":
-        case "hoodie":
-          return "HOODIE";
-        case "vinilo":
-          return "VINYL";
-        case "cd":
-          return "CD";
-        case "poster":
-          return "POSTER";
-        case "pegatina":
-          return "STICKER";
-        case "otro":
-          return "OTHER";
-        default:
-          return String(t).toUpperCase();
-      }
-    };
-    patch.category = mapType(body.type);
-  }
-  if (Object.prototype.hasOwnProperty.call(body ?? {}, "price"))
-    patch.priceCents = body.price
-      ? Math.round(Number(body.price) * 100)
-      : undefined;
-  if (Object.prototype.hasOwnProperty.call(body ?? {}, "currency"))
-    patch.currency = body.currency;
-  if (Object.prototype.hasOwnProperty.call(body ?? {}, "stock"))
-    patch.stock = typeof body.stock === "number" ? body.stock : undefined;
-  if (Object.prototype.hasOwnProperty.call(body ?? {}, "sku"))
-    patch.sku = body.sku;
-  if (Object.prototype.hasOwnProperty.call(body ?? {}, "active"))
-    patch.active = !!body.active;
-
-  // IDs de referencia (sin relaciones FK)
-  if (body?.artistId) patch.artistId = body.artistId;
-  if (body?.labelId) patch.labelId = body.labelId;
-  
-  // Cover: si se envía coverId lo asignamos directamente (sin FK)
-  if (body?.coverId) patch.coverId = body.coverId;
-
-  Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
+  const prisma = getPrismaClient();
+  const patch = buildMerchPatch(body);
 
   const updated = await prisma.merchItem.update({
     where: { id: merchId },
     data: patch,
   });
+  
   return { data: updated };
 };
 
@@ -511,15 +473,7 @@ exports.merchMerchIdVariantsVariantIdPATCH = function (
 exports.merchPOST = async function (body) {
   // Crear merch y persistir en BD usando Prisma
   try {
-    const { PrismaClient } = require("@prisma/client");
-    let prisma;
-    try {
-      const prismaModule = require("../src/db/prisma");
-      prisma = prismaModule?.prisma || prismaModule?.default || prismaModule;
-      if (!prisma) prisma = new PrismaClient();
-    } catch (e) {
-      prisma = new PrismaClient();
-    }
+    const prisma = getPrismaClient();
 
     const {
       name,
@@ -540,34 +494,10 @@ exports.merchPOST = async function (body) {
 
     const priceCents = Math.round(Number(price || 0) * 100);
 
-    const mapType = (t) => {
-      if (!t) return "OTHER";
-      const s = String(t).toLowerCase();
-      switch (s) {
-        case "camiseta":
-          return "SHIRT";
-        case "hoody":
-        case "hoodie":
-          return "HOODIE";
-        case "vinilo":
-          return "VINYL";
-        case "cd":
-          return "CD";
-        case "poster":
-          return "POSTER";
-        case "pegatina":
-          return "STICKER";
-        case "otro":
-          return "OTHER";
-        default:
-          return String(t).toUpperCase();
-      }
-    };
-
     const data = {
       title: name,
       description,
-      category: mapType(type),
+      category: mapMerchType(type) || "OTHER",
       priceCents,
       currency,
       stock: typeof stock === "number" ? stock : Number(stock) || 0,
