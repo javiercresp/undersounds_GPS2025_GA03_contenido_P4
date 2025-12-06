@@ -39,23 +39,35 @@ const buildInclude = (includeCsv) => {
 
 const like = (q) => ({ contains: q.toLowerCase() });
 
-exports.albumsAlbumIdCommentsGET = async function (albumId, page, limit) {
+/**
+ * Helper function to list comments with pagination
+ * @param {Object} where - Prisma where clause
+ * @param {number|string} page - Page number
+ * @param {number|string} limit - Items per page
+ * @returns {Promise<Object>} - Paginated comment list
+ */
+const listComments = async (where, page, limit) => {
   const pageNum = toInt(page, 1);
   const pageSize = toInt(limit, 20);
   const skip = (pageNum - 1) * pageSize;
+
+  const [data, total] = await Promise.all([
+    prisma.comment.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: pageSize,
+    }),
+    prisma.comment.count({ where }),
+  ]);
+  return { data, meta: { total, page: pageNum, limit: pageSize } };
+};
+
+exports.albumsAlbumIdCommentsGET = async function (albumId, page, limit) {
   const where = { targetType: "album", targetId: albumId };
 
   try {
-    const [data, total] = await Promise.all([
-      prisma.comment.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: pageSize,
-      }),
-      prisma.comment.count({ where }),
-    ]);
-    return { data, meta: { total, page: pageNum, limit: pageSize } };
+    return await listComments(where, page, limit);
   } catch (error) {
     console.error("Error fetching album comments:", error);
     throw error;
@@ -277,10 +289,6 @@ exports.commentsCommentIdReportPOST = function (body, commentId) {
  * returns PaginatedCommentList
  **/
 exports.commentsGET = async function (page, limit, targetType, targetId, status, q) {
-  const pageNum = toInt(page, 1);
-  const pageSize = toInt(limit, 20);
-  const skip = (pageNum - 1) * pageSize;
-
   const where = {};
   if (targetType) where.targetType = targetType;
   if (targetId) where.targetId = targetId;
@@ -288,16 +296,7 @@ exports.commentsGET = async function (page, limit, targetType, targetId, status,
   if (q) where.text = like(q);
 
   try {
-    const [data, total] = await Promise.all([
-      prisma.comment.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: pageSize,
-      }),
-      prisma.comment.count({ where }),
-    ]);
-    return { data, meta: { total, page: pageNum, limit: pageSize } };
+    return await listComments(where, page, limit);
   } catch (error) {
     console.error("Error fetching global comments:", error);
     throw error;
@@ -350,21 +349,9 @@ exports.merchMerchIdCommentsGET = async function (merchId, page, limit) {
     limit
   );
 
-  const pageNum = toInt(page, 1);
-  const pageSize = toInt(limit, 20);
-  const skip = (pageNum - 1) * pageSize;
-
   const where = { targetType: "merch", targetId: merchId };
-  const [data, total] = await Promise.all([
-    prisma.comment.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: pageSize,
-    }),
-    prisma.comment.count({ where }),
-  ]);
-  return { data, meta: { total, page: pageNum, limit: pageSize } };
+  
+  return await listComments(where, page, limit);
 };
 
 /**
@@ -402,21 +389,9 @@ exports.merchMerchIdCommentsPOST = async function (body, merchId) {
  * returns PaginatedCommentList
  **/
 exports.tracksTrackIdCommentsGET = async function (trackId, page, limit) {
-  const pageNum = toInt(page, 1);
-  const pageSize = toInt(limit, 20);
-  const skip = (pageNum - 1) * pageSize;
-
   const where = { targetType: "track", targetId: trackId };
-  const [data, total] = await Promise.all([
-    prisma.comment.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: pageSize,
-    }),
-    prisma.comment.count({ where }),
-  ]);
-  return { data, meta: { total, page: pageNum, limit: pageSize } };
+  
+  return await listComments(where, page, limit);
 };
 
 /**
