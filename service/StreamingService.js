@@ -89,8 +89,8 @@ exports.streamTrackAudio = async (trackId, req, res) => {
     if (range) {
       // Cliente solicita un rango: "bytes=1024-2047" o "bytes=1024-"
       const parts = range.replace(/bytes=/, '').split('-');
-      const start = parseInt(parts[0], 10);
-      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      const start = Number.parseInt(parts[0], 10);
+      const end = parts[1] ? Number.parseInt(parts[1], 10) : fileSize - 1;
 
       // Validaciones de rango
       if (isNaN(start) || start < 0 || start >= fileSize) {

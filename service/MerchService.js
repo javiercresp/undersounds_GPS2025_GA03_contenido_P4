@@ -39,7 +39,7 @@ exports.merchGET = async function (
     }
 
     const toInt = (v, def) => {
-      const n = parseInt(v, 10);
+      const n = Number.parseInt(v, 10);
       return Number.isFinite(n) && n > 0 ? n : def;
     };
 
