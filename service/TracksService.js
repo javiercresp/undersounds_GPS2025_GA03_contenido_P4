@@ -95,8 +95,8 @@ exports.tracksGET = async function (
     const min = Number(minDurationSec);
     const max = Number(maxDurationSec);
     const durationFilter = {};
-    if (!isNaN(min)) durationFilter.gte = min;
-    if (!isNaN(max)) durationFilter.lte = max;
+    if (!Number.isNaN(min)) durationFilter.gte = min;
+    if (!Number.isNaN(max)) durationFilter.lte = max;
     if (Object.keys(durationFilter).length > 0) {
       trackFilters.durationSec = durationFilter;
     }

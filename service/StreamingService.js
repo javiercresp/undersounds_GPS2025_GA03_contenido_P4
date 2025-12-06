@@ -93,7 +93,7 @@ exports.streamTrackAudio = async (trackId, req, res) => {
       const end = parts[1] ? Number.parseInt(parts[1], 10) : fileSize - 1;
 
       // Validaciones de rango
-      if (isNaN(start) || start < 0 || start >= fileSize) {
+      if (Number.isNaN(start) || start < 0 || start >= fileSize) {
         res.status(416).set('Content-Range', `bytes */${fileSize}`).send('Range Not Satisfiable');
         return;
       }
