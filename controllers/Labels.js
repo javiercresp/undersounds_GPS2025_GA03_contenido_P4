@@ -1,7 +1,7 @@
 'use strict';
 
-var utils = require('../utils/writer.js');
-var Labels = require('../service/LabelsService');
+const utils = require('../utils/writer.js');
+const Labels = require('../service/LabelsService');
 
 module.exports.labelsGET = function labelsGET (req, res, next, page, limit, q, country) {
   Labels.labelsGET(page, limit, q, country)

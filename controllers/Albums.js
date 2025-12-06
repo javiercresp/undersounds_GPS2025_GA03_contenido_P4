@@ -1,7 +1,7 @@
 "use strict";
 
-var utils = require("../utils/writer.js");
-var Albums = require("../service/AlbumsService");
+const utils = require("../utils/writer.js");
+const Albums = require("../service/AlbumsService");
 
 module.exports.albumsAlbumIdCommentsGET = function (
   req,

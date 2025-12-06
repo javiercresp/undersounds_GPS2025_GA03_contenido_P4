@@ -1,7 +1,7 @@
 'use strict';
 
-var utils = require('../utils/writer.js');
-var Comments = require('../service/CommentsService');
+const utils = require('../utils/writer.js');
+const Comments = require('../service/CommentsService');
 
 module.exports.albumsAlbumIdCommentsGET = function albumsAlbumIdCommentsGET (req, res, next, albumId, page, limit) {
   Comments.albumsAlbumIdCommentsGET(limit, albumId, page)

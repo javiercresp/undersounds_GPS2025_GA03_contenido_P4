@@ -1,7 +1,7 @@
 "use strict";
 
-var utils = require("../utils/writer.js");
-var Merch = require("../service/MerchService");
+const utils = require("../utils/writer.js");
+const Merch = require("../service/MerchService");
 
 module.exports.merchGET = function merchGET (req, res, next, page, limit, artistId, labelId, type, availability, sort, order, q) {
   Merch.merchGET(page, limit, artistId, labelId, type, availability, sort, order, q)

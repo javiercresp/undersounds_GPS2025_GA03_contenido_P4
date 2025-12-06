@@ -1,7 +1,7 @@
 'use strict';
 
-var utils = require('../utils/writer.js');
-var Favorites = require('../service/FavoritesService');
+const utils = require('../utils/writer.js');
+const Favorites = require('../service/FavoritesService');
 
 module.exports.usersUserIdFavoritesAlbumsAlbumIdDELETE = function usersUserIdFavoritesAlbumsAlbumIdDELETE (req, res, next, userId, albumId) {
   const userIdParam = req.params && req.params.userId ? String(req.params.userId) : String(userId);

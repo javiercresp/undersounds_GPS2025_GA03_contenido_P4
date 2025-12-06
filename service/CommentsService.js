@@ -192,7 +192,7 @@ exports.commentsCommentIdPATCH = async function (body, commentId) {
  **/
 exports.commentsCommentIdRepliesGET = function (commentId) {
   return new Promise(function (resolve, reject) {
-    var examples = {};
+    const examples = {};
     examples["application/json"] = {
       data: [
         {
@@ -240,7 +240,7 @@ exports.commentsCommentIdRepliesGET = function (commentId) {
  **/
 exports.commentsCommentIdRepliesPOST = function (body, commentId) {
   return new Promise(function (resolve, reject) {
-    var examples = {};
+    const examples = {};
     examples["application/json"] = {
       data: {
         createdAt: "2000-01-23T04:56:07.000+00:00",

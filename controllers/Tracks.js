@@ -1,8 +1,8 @@
 'use strict';
 
-var utils = require('../utils/writer.js');
-var Tracks = require('../service/TracksService');
-var StreamingService = require('../service/StreamingService');
+const utils = require('../utils/writer.js');
+const Tracks = require('../service/TracksService');
+const StreamingService = require('../service/StreamingService');
 
 module.exports.tracksGET = function tracksGET (req, res, next, page, limit, include, albumId, artistId, labelId, genre, tag, language, minDurationSec, maxDurationSec, releasedFrom, releasedTo, sort, order, q) {
   Tracks.tracksGET(page, limit, include, albumId, artistId, labelId, genre, tag, language, minDurationSec, maxDurationSec, releasedFrom, releasedTo, sort, order, q)

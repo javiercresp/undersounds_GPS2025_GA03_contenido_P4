@@ -135,7 +135,7 @@ exports.merchGET = async function (
  **/
 exports.merchMerchIdCommentsGET = function (merchId, page, limit) {
   return new Promise(function (resolve, reject) {
-    var examples = {};
+    const examples = {};
     examples["application/json"] = {
       data: [
         {
@@ -188,7 +188,7 @@ exports.merchMerchIdCommentsGET = function (merchId, page, limit) {
  **/
 exports.merchMerchIdCommentsPOST = function (body, merchId) {
   return new Promise(function (resolve, reject) {
-    var examples = {};
+    const examples = {};
     examples["application/json"] = {
       data: {
         createdAt: "2000-01-23T04:56:07.000+00:00",
@@ -395,7 +395,7 @@ exports.merchMerchIdPATCH = async function (body, merchId) {
  **/
 exports.merchMerchIdVariantsGET = function (merchId) {
   return new Promise(function (resolve, reject) {
-    var examples = {};
+    const examples = {};
     examples["application/json"] = {
       data: [
         {
@@ -435,7 +435,7 @@ exports.merchMerchIdVariantsGET = function (merchId) {
  **/
 exports.merchMerchIdVariantsPOST = function (body, merchId) {
   return new Promise(function (resolve, reject) {
-    var examples = {};
+    const examples = {};
     examples["application/json"] = {
       data: {
         color: "color",
@@ -482,7 +482,7 @@ exports.merchMerchIdVariantsVariantIdPATCH = function (
   variantId
 ) {
   return new Promise(function (resolve, reject) {
-    var examples = {};
+    const examples = {};
     examples["application/json"] = {
       data: {
         color: "color",

@@ -1,7 +1,7 @@
 'use strict';
 
-var utils = require('../utils/writer.js');
-var Uploads = require('../service/UploadsService');
+const utils = require('../utils/writer.js');
+const Uploads = require('../service/UploadsService');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');

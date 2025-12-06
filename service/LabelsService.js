@@ -12,7 +12,7 @@
  **/
 exports.labelsGET = function(page,limit,q,country) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
+    const examples = {};
     examples['application/json'] = {
   "data" : [ {
     "country" : "country",
@@ -388,7 +388,7 @@ exports.labelsGET = function(page,limit,q,country) {
  **/
 exports.labelsLabelIdAlbumsGET = function(labelId,page,limit) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
+    const examples = {};
     examples['application/json'] = {
   "data" : [ {
     "artist" : {
@@ -586,7 +586,7 @@ exports.labelsLabelIdArtistsArtistIdDELETE = function(labelId,artistId) {
  **/
 exports.labelsLabelIdArtistsGET = function(labelId) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
+    const examples = {};
     examples['application/json'] = {
   "data" : [ {
     "name" : "name",
@@ -614,7 +614,7 @@ exports.labelsLabelIdArtistsGET = function(labelId) {
  **/
 exports.labelsLabelIdArtistsPOST = function(body,labelId) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
+    const examples = {};
     examples['application/json'] = {
   "data" : [ {
     "name" : "name",
@@ -655,7 +655,7 @@ exports.labelsLabelIdDELETE = function(labelId) {
  **/
 exports.labelsLabelIdGET = function(labelId,include) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
+    const examples = {};
     examples['application/json'] = {
   "data" : {
     "country" : "country",
@@ -851,7 +851,7 @@ exports.labelsLabelIdGET = function(labelId,include) {
  **/
 exports.labelsLabelIdPATCH = function(body,labelId) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
+    const examples = {};
     examples['application/json'] = {
   "data" : {
     "country" : "country",
@@ -1046,7 +1046,7 @@ exports.labelsLabelIdPATCH = function(body,labelId) {
  **/
 exports.labelsPOST = function(body) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
+    const examples = {};
     examples['application/json'] = {
   "data" : {
     "country" : "country",
